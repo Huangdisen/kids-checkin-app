@@ -52,12 +52,21 @@ const defaultRewards = [
 const DOM = {};
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     cacheDOM();
     loadData();
     initializeApp();
     bindEvents();
     updateUI();
+
+    // 后台初始化 Supabase 并同步
+    if (typeof initSupabaseAuto === 'function') {
+        const supabaseOk = await initSupabaseAuto();
+        if (supabaseOk) {
+            // 尝试从云端加载数据（如果本地没有）
+            await tryLoadFromCloud();
+        }
+    }
 });
 
 // 缓存 DOM 元素
@@ -166,6 +175,54 @@ function saveData() {
         lockDate: AppState.lockDate
     };
     localStorage.setItem('kidsCheckinApp', JSON.stringify(data));
+
+    // 同步到云端（非阻塞）
+    syncToCloud();
+}
+
+// 同步到 Supabase 云端
+async function syncToCloud() {
+    if (typeof isSupabaseReady !== 'function' || !isSupabaseReady()) return;
+
+    try {
+        await syncTasksToCloud(AppState.tasks);
+        await syncRewardsToCloud(AppState.rewards);
+        await syncStatsToCloud(AppState.stats);
+    } catch (error) {
+        console.error('云端同步失败:', error);
+    }
+}
+
+// 尝试从云端加载数据
+async function tryLoadFromCloud() {
+    if (typeof isSupabaseReady !== 'function' || !isSupabaseReady()) return;
+
+    // 如果本地已有数据，先同步到云端
+    if (AppState.tasks.length > 0) {
+        await syncToCloud();
+        console.log('本地数据已同步到云端');
+    } else {
+        // 本地没数据，尝试从云端加载
+        const cloudTasks = await loadTasksFromCloud();
+        const cloudRewards = await loadRewardsFromCloud();
+        const cloudStats = await loadStatsFromCloud();
+
+        if (cloudTasks && cloudTasks.length > 0) {
+            AppState.tasks = cloudTasks;
+            console.log('从云端加载了任务');
+        }
+        if (cloudRewards && cloudRewards.length > 0) {
+            AppState.rewards = cloudRewards;
+            console.log('从云端加载了奖励');
+        }
+        if (cloudStats) {
+            AppState.stats = cloudStats;
+            console.log('从云端加载了统计');
+        }
+
+        updateUI();
+        saveData(); // 保存到本地
+    }
 }
 
 // 检查是否是新的一天
