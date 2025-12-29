@@ -7,7 +7,7 @@ const SUPABASE_URL = 'https://tpcpgwvbujxncnhegwqm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY3Bnd3ZidWp4bmNuaGVnd3FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5OTk3MDIsImV4cCI6MjA4MjU3NTcwMn0.gwzRe5E5JAEw7i0w0IzunKpVd9aIvmtDGG1dtbGux18';
 
 // 固定的家庭码 - 无需登录
-const FIXED_FAMILY_CODE = 'xiaoxingxing';
+const FIXED_FAMILY_CODE = 'starfamily';
 const FIXED_FAMILY_NAME = '小星星之家';
 
 let supabaseClient = null;
