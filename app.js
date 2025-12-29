@@ -885,7 +885,7 @@ function initSignatureCanvas() {
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
 
-    // 触摸事件 (Apple Pencil 支持)
+    // 触摸事件 (Apple Pencil 支持) - 移除 passive:false 的警告
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
@@ -896,6 +896,10 @@ function initSignatureCanvas() {
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', stopDrawing);
     canvas.addEventListener('pointercancel', stopDrawing);
+
+    // 防止 iOS 上的滚动干扰
+    canvas.style.touchAction = 'none';
+    canvas.style.msTouchAction = 'none';
 }
 
 // 调整画布尺寸

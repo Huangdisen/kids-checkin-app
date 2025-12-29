@@ -1112,6 +1112,11 @@ body {
     border-radius: var(--radius-md);
     cursor: crosshair;
     touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* 移除触摸延迟 */
+    -webkit-tap-highlight-color: transparent;
 }
 
 .signature-canvas.signing {
