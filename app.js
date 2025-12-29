@@ -1,5 +1,5 @@
 /* ===================================
-   儿童打卡积分系统 - 应用逻辑 (Supabase 版本)
+   儿童打卡积分系统 - 应用逻辑
    =================================== */
 
 // 应用状态
@@ -7,8 +7,7 @@ const AppState = {
     tasks: [],
     rewards: [],
     history: [],
-    recycleBin: [],
-    todayCheckins: [], // 今日打卡状态
+    recycleBin: [], // 回收箱
     stats: {
         totalPoints: 0,
         streakDays: 0,
@@ -18,43 +17,48 @@ const AppState = {
         totalRedeemed: 0,
         lastCheckInDate: null
     },
+    // 锁定状态
     todayLocked: false,
     todaySignature: null,
     lockDate: null
 };
 
+// 默认任务 - 日常任务
+const defaultTasks = [
+    { id: 1, emoji: '🌅', name: '早上准时起床', points: 1, completed: false },
+    { id: 2, emoji: '📖', name: '早读', points: 2, completed: false },
+    { id: 3, emoji: '🍳', name: '吃完早餐', points: 1, completed: false },
+    { id: 4, emoji: '🚪', name: '准时出门', points: 1, completed: false },
+    { id: 5, emoji: '✏️', name: '每晚做完作业', points: 2, completed: false },
+    { id: 6, emoji: '📚', name: '复习3科', points: 3, completed: false },
+    { id: 7, emoji: '📕', name: '阅读课外书', points: 2, completed: false },
+    { id: 8, emoji: '🧹', name: '搞好自己房间卫生', points: 2, completed: false },
+    { id: 9, emoji: '😴', name: '准时睡觉', points: 1, completed: false },
+    // 额外加分项
+    { id: 10, emoji: '🧹', name: '【加分】扫地', points: 2, completed: false },
+    { id: 11, emoji: '👕', name: '【加分】收衣服', points: 2, completed: false },
+    { id: 12, emoji: '👔', name: '【加分】收拾衣服', points: 2, completed: false },
+    { id: 13, emoji: '👶', name: '【加分】主动帮妹妹或照顾妹妹', points: 3, completed: false }
+];
+
+// 默认奖励
+const defaultRewards = [
+    { id: 1, emoji: '📺', name: '看30分钟电视', cost: 50 },
+    { id: 2, emoji: '🎬', name: '选择自己喜欢的电影', cost: 80 },
+    { id: 3, emoji: '🎁', name: '购买20元内礼物', cost: 100 }
+];
+
 // DOM 元素缓存
 const DOM = {};
 
 // 初始化
-document.addEventListener('DOMContentLoaded', async () => {
-    // 先初始化 Supabase
-    if (!initSupabase()) {
-        console.error('Supabase 初始化失败，应用无法启动');
-        alert('网络连接失败，请刷新页面重试');
-        return;
-    }
-
+document.addEventListener('DOMContentLoaded', () => {
     cacheDOM();
-    bindLoginEvents();
-
-    // 检查是否已登录
-    const isLoggedIn = await checkStoredLogin();
-    if (isLoggedIn) {
-        await enterApp();
-    }
-});
-
-// 进入主应用
-async function enterApp() {
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('appContainer').style.display = 'block';
-
-    await loadData();
+    loadData();
     initializeApp();
     bindEvents();
     updateUI();
-}
+});
 
 // 缓存 DOM 元素
 function cacheDOM() {
@@ -69,17 +73,20 @@ function cacheDOM() {
     DOM.progressText = document.getElementById('progressText');
     DOM.progressFill = document.getElementById('progressFill');
 
+    // 统计
     DOM.totalCheckins = document.getElementById('totalCheckins');
     DOM.totalEarned = document.getElementById('totalEarned');
     DOM.totalRedeemed = document.getElementById('totalRedeemed');
     DOM.maxStreak = document.getElementById('maxStreak');
 
+    // 弹窗
     DOM.taskModal = document.getElementById('taskModal');
     DOM.rewardModal = document.getElementById('rewardModal');
     DOM.successModal = document.getElementById('successModal');
     DOM.passwordModal = document.getElementById('passwordModal');
     DOM.celebration = document.getElementById('celebration');
 
+    // 表单
     DOM.taskEmoji = document.getElementById('taskEmoji');
     DOM.taskName = document.getElementById('taskName');
     DOM.taskPoints = document.getElementById('taskPoints');
@@ -87,7 +94,9 @@ function cacheDOM() {
     DOM.rewardName = document.getElementById('rewardName');
     DOM.rewardPoints = document.getElementById('rewardPoints');
     DOM.earnedPoints = document.getElementById('earnedPoints');
+    DOM.successMessage = document.getElementById('successMessage');
 
+    // 签名相关
     DOM.signatureSection = document.getElementById('signatureSection');
     DOM.signatureCanvas = document.getElementById('signatureCanvas');
     DOM.signaturePlaceholder = document.getElementById('signaturePlaceholder');
@@ -95,9 +104,11 @@ function cacheDOM() {
     DOM.lockedSignature = document.getElementById('lockedSignature');
     DOM.addTaskBtn = document.getElementById('addTaskBtn');
 
+    // 密码相关
     DOM.unlockPassword = document.getElementById('unlockPassword');
     DOM.passwordError = document.getElementById('passwordError');
 
+    // 确认弹窗相关
     DOM.confirmModal = document.getElementById('confirmModal');
     DOM.confirmIcon = document.getElementById('confirmIcon');
     DOM.confirmTitle = document.getElementById('confirmTitle');
@@ -105,163 +116,99 @@ function cacheDOM() {
     DOM.confirmOk = document.getElementById('confirmOk');
     DOM.confirmCancel = document.getElementById('confirmCancel');
 
+    // 回收箱相关
     DOM.recycleList = document.getElementById('recycleList');
     DOM.recycleEmpty = document.getElementById('recycleEmpty');
 
+    // 奖励卡片相关
     DOM.rewardEmojiLarge = document.getElementById('rewardEmojiLarge');
     DOM.rewardNameLarge = document.getElementById('rewardNameLarge');
     DOM.rewardCostLarge = document.getElementById('rewardCostLarge');
-
-    // 登录相关
-    DOM.loginPage = document.getElementById('loginPage');
-    DOM.appContainer = document.getElementById('appContainer');
-    DOM.familyCodeInput = document.getElementById('familyCodeInput');
-    DOM.loginBtn = document.getElementById('loginBtn');
-    DOM.loginError = document.getElementById('loginError');
 }
 
-// 绑定登录相关事件
-function bindLoginEvents() {
-    // 登录按钮
-    document.getElementById('loginBtn').addEventListener('click', handleLogin);
-    document.getElementById('familyCodeInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
+// 从本地存储加载数据
+function loadData() {
+    const savedData = localStorage.getItem('kidsCheckinApp');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        AppState.tasks = data.tasks || [];
+        AppState.rewards = data.rewards || [];
+        AppState.history = data.history || [];
+        AppState.recycleBin = data.recycleBin || [];
+        AppState.stats = data.stats || AppState.stats;
+        AppState.todayLocked = data.todayLocked || false;
+        AppState.todaySignature = data.todaySignature || null;
+        AppState.lockDate = data.lockDate || null;
 
-    // 创建家庭
-    document.getElementById('showCreateFamily').addEventListener('click', (e) => {
-        e.preventDefault();
-        showModal('createFamilyModal');
-    });
-    document.getElementById('closeCreateFamily').addEventListener('click', () => hideModal('createFamilyModal'));
-    document.getElementById('cancelCreateFamily').addEventListener('click', () => hideModal('createFamilyModal'));
-    document.getElementById('confirmCreateFamily').addEventListener('click', handleCreateFamily);
-}
+        // 自动按任务 ID 排序，确保默认任务顺序正确
+        AppState.tasks.sort((a, b) => a.id - b.id);
 
-// 处理登录
-async function handleLogin() {
-    const familyCode = document.getElementById('familyCodeInput').value.trim();
-    if (!familyCode) {
-        document.getElementById('loginError').textContent = '请输入家庭码';
-        return;
-    }
-
-    document.getElementById('loginBtn').textContent = '登录中...';
-    document.getElementById('loginBtn').disabled = true;
-
-    const result = await loginFamily(familyCode);
-
-    if (result.success) {
-        await enterApp();
+        // 检查是否是新的一天，如果是则重置任务完成状态
+        checkNewDay();
     } else {
-        document.getElementById('loginError').textContent = result.error;
+        // 首次使用，初始化默认数据
+        AppState.tasks = JSON.parse(JSON.stringify(defaultTasks));
+        AppState.rewards = JSON.parse(JSON.stringify(defaultRewards));
+        saveData();
     }
-
-    document.getElementById('loginBtn').textContent = '进入';
-    document.getElementById('loginBtn').disabled = false;
 }
 
-// 处理创建家庭
-async function handleCreateFamily() {
-    const familyName = document.getElementById('newFamilyName').value.trim();
-    const familyCode = document.getElementById('newFamilyCode').value.trim();
-    const password = document.getElementById('newFamilyPassword').value.trim() || '0000';
-
-    if (!familyName || !familyCode) {
-        alert('请填写家庭名称和家庭码');
-        return;
-    }
-
-    if (familyCode.length < 4) {
-        alert('家庭码至少需要4个字符');
-        return;
-    }
-
-    document.getElementById('confirmCreateFamily').textContent = '创建中...';
-    document.getElementById('confirmCreateFamily').disabled = true;
-
-    const result = await createFamily(familyCode, familyName, password);
-
-    if (result.success) {
-        hideModal('createFamilyModal');
-        document.getElementById('familyCodeInput').value = familyCode;
-        alert('家庭创建成功！请记住您的家庭码: ' + familyCode);
-        await handleLogin();
-    } else {
-        alert('创建失败: ' + result.error);
-    }
-
-    document.getElementById('confirmCreateFamily').textContent = '创建家庭';
-    document.getElementById('confirmCreateFamily').disabled = false;
-}
-
-// 从 Supabase 加载数据
-async function loadData() {
-    // 加载任务
-    AppState.tasks = await fetchTasks();
-
-    // 加载今日打卡状态
-    AppState.todayCheckins = await fetchTodayCheckins();
-
-    // 合并打卡状态到任务
-    AppState.tasks.forEach(task => {
-        const checkin = AppState.todayCheckins.find(c => c.task_id === task.id);
-        task.completed = checkin ? checkin.completed : false;
-    });
-
-    // 加载回收箱
-    AppState.recycleBin = await fetchDeletedTasks();
-
-    // 加载奖励
-    AppState.rewards = await fetchRewards();
-
-    // 加载统计
-    const stats = await fetchStats();
-    if (stats) {
-        AppState.stats = {
-            totalPoints: stats.total_points || 0,
-            streakDays: stats.streak_days || 0,
-            maxStreak: stats.max_streak || 0,
-            totalCheckins: stats.total_checkins || 0,
-            totalEarned: stats.total_earned || 0,
-            totalRedeemed: stats.total_redeemed || 0,
-            lastCheckInDate: stats.last_checkin_date
-        };
-        AppState.todayLocked = stats.today_locked || false;
-        AppState.todaySignature = stats.today_signature;
-        AppState.lockDate = stats.lock_date;
-    }
-
-    // 加载历史记录
-    AppState.history = await fetchHistory();
-
-    // 检查是否是新的一天
-    checkNewDay();
+// 保存数据到本地存储
+function saveData() {
+    const data = {
+        tasks: AppState.tasks,
+        rewards: AppState.rewards,
+        history: AppState.history,
+        recycleBin: AppState.recycleBin,
+        stats: AppState.stats,
+        todayLocked: AppState.todayLocked,
+        todaySignature: AppState.todaySignature,
+        lockDate: AppState.lockDate
+    };
+    localStorage.setItem('kidsCheckinApp', JSON.stringify(data));
 }
 
 // 检查是否是新的一天
 function checkNewDay() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toDateString();
+    const lastDate = AppState.stats.lastCheckInDate;
     const lockDate = AppState.lockDate;
 
+    // 检查锁定状态是否需要重置
     if (lockDate && lockDate !== today) {
         AppState.todayLocked = false;
         AppState.todaySignature = null;
         AppState.lockDate = null;
+    }
 
-        // 更新服务器
-        updateStats({
-            today_locked: false,
-            today_signature: null,
-            lock_date: null
+    if (lastDate && lastDate !== today) {
+        // 检查是否是连续的一天
+        const lastCheckIn = new Date(lastDate);
+        const todayDate = new Date(today);
+        const diffDays = Math.floor((todayDate - lastCheckIn) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 1) {
+            // 连续打卡中断
+            AppState.stats.streakDays = 0;
+        }
+
+        // 重置所有任务的完成状态
+        AppState.tasks.forEach(task => {
+            task.completed = false;
         });
+        saveData();
     }
 }
 
 // 初始化应用
 function initializeApp() {
+    // 设置问候语
     updateGreeting();
+
+    // 设置日期
     updateDate();
+
+    // 初始化签名画布
     initSignatureCanvas();
 }
 
@@ -286,14 +233,14 @@ function updateGreeting() {
         greeting = '🌙 夜深了，准备睡觉吧！';
     }
 
-    if (DOM.greeting) DOM.greeting.textContent = greeting;
+    DOM.greeting.textContent = greeting;
 }
 
 // 更新日期显示
 function updateDate() {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    if (DOM.currentDate) DOM.currentDate.textContent = now.toLocaleDateString('zh-CN', options);
+    DOM.currentDate.textContent = now.toLocaleDateString('zh-CN', options);
 }
 
 // 绑定事件
@@ -341,13 +288,11 @@ function bindEvents() {
 
     // 点击弹窗外部关闭
     [DOM.taskModal, DOM.rewardModal, DOM.successModal, DOM.passwordModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('show');
-                }
-            });
-        }
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
     });
 
     // 签名相关事件
@@ -368,6 +313,7 @@ function bindEvents() {
     });
     document.getElementById('confirmPassword').addEventListener('click', handlePasswordConfirm);
 
+    // 密码输入框回车确认
     DOM.unlockPassword.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handlePasswordConfirm();
@@ -377,14 +323,17 @@ function bindEvents() {
 
 // 页面切换
 function switchPage(pageId) {
+    // 更新导航按钮状态
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.page === pageId);
     });
 
+    // 更新页面显示
     document.querySelectorAll('.page').forEach(page => {
         page.classList.toggle('active', page.id === pageId);
     });
 
+    // 如果切换到商城，更新积分显示
     if (pageId === 'shopPage') {
         DOM.shopPoints.textContent = AppState.stats.totalPoints;
     }
@@ -399,6 +348,7 @@ function showModal(modalId) {
 function hideModal(modalId) {
     document.getElementById(modalId).classList.remove('show');
 
+    // 清空表单
     if (modalId === 'taskModal') {
         DOM.taskName.value = '';
         DOM.taskEmoji.selectedIndex = 0;
@@ -417,125 +367,103 @@ function hideModal(modalId) {
 }
 
 // 保存新任务
-async function saveNewTask() {
+function saveNewTask() {
     const name = DOM.taskName.value.trim();
     if (!name) {
         alert('请输入任务名称！');
         return;
     }
 
-    const newTask = await addTask(
-        DOM.taskEmoji.value,
-        name,
-        parseInt(DOM.taskPoints.value)
-    );
+    const newTask = {
+        id: Date.now(),
+        emoji: DOM.taskEmoji.value,
+        name: name,
+        points: parseInt(DOM.taskPoints.value),
+        completed: false
+    };
 
-    if (newTask) {
-        newTask.completed = false;
-        AppState.tasks.push(newTask);
-        renderTasks();
-        hideModal('taskModal');
-    } else {
-        alert('添加任务失败，请重试');
-    }
+    AppState.tasks.push(newTask);
+    saveData();
+    renderTasks();
+    hideModal('taskModal');
 }
 
 // 保存新奖励
-async function saveNewReward() {
+function saveNewReward() {
     const name = DOM.rewardName.value.trim();
     if (!name) {
         alert('请输入奖励名称！');
         return;
     }
 
-    const newReward = await addReward(
-        DOM.rewardEmoji.value,
-        name,
-        parseInt(DOM.rewardPoints.value)
-    );
+    const newReward = {
+        id: Date.now(),
+        emoji: DOM.rewardEmoji.value,
+        name: name,
+        cost: parseInt(DOM.rewardPoints.value)
+    };
 
-    if (newReward) {
-        AppState.rewards.push(newReward);
-        renderRewards();
-        hideModal('rewardModal');
-    } else {
-        alert('添加奖励失败，请重试');
-    }
+    AppState.rewards.push(newReward);
+    saveData();
+    renderRewards();
+    hideModal('rewardModal');
 }
 
 // 任务打卡
-async function toggleTaskById(taskId) {
+function toggleTask(taskId) {
     const task = AppState.tasks.find(t => t.id === taskId);
-    if (!task) return;
+    if (!task || task.completed) return;
 
-    const newCompleted = !task.completed;
+    // 标记完成
+    task.completed = true;
 
-    // 先更新UI
-    task.completed = newCompleted;
+    // 更新积分
+    AppState.stats.totalPoints += task.points;
+    AppState.stats.totalEarned += task.points;
+    AppState.stats.totalCheckins++;
 
-    // 更新服务器
-    const success = await toggleCheckin(taskId, newCompleted);
-    if (!success) {
-        task.completed = !newCompleted; // 恢复状态
-        alert('操作失败，请重试');
-        updateUI();
-        return;
-    }
+    // 更新连续打卡
+    const today = new Date().toDateString();
+    if (AppState.stats.lastCheckInDate !== today) {
+        AppState.stats.streakDays++;
+        AppState.stats.lastCheckInDate = today;
 
-    if (newCompleted) {
-        // 打卡成功
-        AppState.stats.totalPoints += task.points;
-        AppState.stats.totalEarned += task.points;
-        AppState.stats.totalCheckins++;
-
-        const today = new Date().toISOString().split('T')[0];
-        if (AppState.stats.lastCheckInDate !== today) {
-            AppState.stats.streakDays++;
-            AppState.stats.lastCheckInDate = today;
-            if (AppState.stats.streakDays > AppState.stats.maxStreak) {
-                AppState.stats.maxStreak = AppState.stats.streakDays;
-            }
+        if (AppState.stats.streakDays > AppState.stats.maxStreak) {
+            AppState.stats.maxStreak = AppState.stats.streakDays;
         }
-
-        await addHistoryRecord('checkin', task.emoji + ' ' + task.name, task.points);
-        showCelebration(task.points);
-    } else {
-        // 取消打卡
-        AppState.stats.totalPoints -= task.points;
-        AppState.stats.totalEarned -= task.points;
-        AppState.stats.totalCheckins--;
-
-        await addHistoryRecord('cancel', '❌ 取消: ' + task.emoji + ' ' + task.name, -task.points);
     }
 
-    // 更新服务器统计
-    await updateStats({
-        total_points: AppState.stats.totalPoints,
-        total_earned: AppState.stats.totalEarned,
-        total_checkins: AppState.stats.totalCheckins,
-        streak_days: AppState.stats.streakDays,
-        max_streak: AppState.stats.maxStreak,
-        last_checkin_date: AppState.stats.lastCheckInDate
-    });
+    // 添加历史记录
+    addHistory('checkin', task.emoji + ' ' + task.name, task.points);
 
+    // 保存数据
+    saveData();
+
+    // 显示庆祝动画
+    showCelebration(task.points);
+
+    // 更新 UI
     updateUI();
 }
 
-// 删除任务 (移到回收箱)
-function deleteTaskById(taskId) {
+// 删除任务 (移到回收箱) - 需要密码验证
+function deleteTask(taskId) {
     requirePassword(() => {
         showConfirm(
             '🗑️',
             '删除任务',
             '任务将移到回收箱，可随时还原',
-            async () => {
-                const success = await deleteTask(taskId);
-                if (success) {
-                    const task = AppState.tasks.find(t => t.id === taskId);
-                    if (task) {
-                        AppState.recycleBin.unshift({ ...task, deleted_at: new Date().toISOString() });
-                        AppState.tasks = AppState.tasks.filter(t => t.id !== taskId);
-                    }
+            () => {
+                const task = AppState.tasks.find(t => t.id === taskId);
+                if (task) {
+                    // 添加到回收箱
+                    AppState.recycleBin.push({
+                        ...task,
+                        deletedAt: new Date().toISOString()
+                    });
+                    // 从任务列表移除
+                    AppState.tasks = AppState.tasks.filter(t => t.id !== taskId);
+                    saveData();
                     renderTasks();
                     renderRecycleBin();
                     updateProgress();
@@ -543,47 +471,6 @@ function deleteTaskById(taskId) {
             }
         );
     });
-}
-
-// 还原任务
-async function restoreTaskById(taskId) {
-    const success = await restoreTask(taskId);
-    if (success) {
-        const task = AppState.recycleBin.find(t => t.id === taskId);
-        if (task) {
-            delete task.deleted_at;
-            task.completed = false;
-
-            let insertIndex = AppState.tasks.length;
-            for (let i = 0; i < AppState.tasks.length; i++) {
-                if (AppState.tasks[i].id > task.id) {
-                    insertIndex = i;
-                    break;
-                }
-            }
-            AppState.tasks.splice(insertIndex, 0, task);
-            AppState.recycleBin = AppState.recycleBin.filter(t => t.id !== taskId);
-        }
-        renderTasks();
-        renderRecycleBin();
-        updateProgress();
-    }
-}
-
-// 彻底删除任务
-function deletePermanentlyById(taskId) {
-    showConfirm(
-        '⚠️',
-        '彻底删除',
-        '此操作不可恢复，确定要彻底删除吗？',
-        async () => {
-            const success = await permanentlyDeleteTask(taskId);
-            if (success) {
-                AppState.recycleBin = AppState.recycleBin.filter(t => t.id !== taskId);
-                renderRecycleBin();
-            }
-        }
-    );
 }
 
 // 渲染回收箱
@@ -605,15 +492,63 @@ function renderRecycleBin() {
                 <div class="recycle-item-points">+${task.points} ⭐</div>
             </div>
             <div class="recycle-item-actions">
-                <button class="btn-restore" onclick="restoreTaskById(${task.id})">还原</button>
-                <button class="btn-delete-permanent" onclick="deletePermanentlyById(${task.id})">彻底删除</button>
+                <button class="btn-restore" onclick="restoreTask(${task.id})">还原</button>
+                <button class="btn-delete-permanent" onclick="deletePermanently(${task.id})">彻底删除</button>
             </div>
         </div>
     `).join('');
 }
 
+// 还原任务
+function restoreTask(taskId) {
+    const taskIndex = AppState.recycleBin.findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return;
+
+    const task = AppState.recycleBin[taskIndex];
+    // 移除删除时间戳
+    delete task.deletedAt;
+    // 重置完成状态
+    task.completed = false;
+
+    // 找到正确的插入位置，保持原来的顺序
+    // 默认任务 (id 1-13) 按照原始顺序插入
+    // 用户创建的任务按照 id 顺序插入
+    let insertIndex = AppState.tasks.length; // 默认添加到末尾
+
+    for (let i = 0; i < AppState.tasks.length; i++) {
+        if (AppState.tasks[i].id > task.id) {
+            insertIndex = i;
+            break;
+        }
+    }
+
+    // 在正确位置插入任务
+    AppState.tasks.splice(insertIndex, 0, task);
+    // 从回收箱移除
+    AppState.recycleBin.splice(taskIndex, 1);
+
+    saveData();
+    renderTasks();
+    renderRecycleBin();
+    updateProgress();
+}
+
+// 彻底删除任务
+function deletePermanently(taskId) {
+    showConfirm(
+        '⚠️',
+        '彻底删除',
+        '此操作不可恢复，确定要彻底删除吗？',
+        () => {
+            AppState.recycleBin = AppState.recycleBin.filter(t => t.id !== taskId);
+            saveData();
+            renderRecycleBin();
+        }
+    );
+}
+
 // 兑换奖励
-async function redeemRewardById(rewardId) {
+function redeemReward(rewardId) {
     const reward = AppState.rewards.find(r => r.id === rewardId);
     if (!reward) return;
 
@@ -626,61 +561,79 @@ async function redeemRewardById(rewardId) {
         '🎁',
         '确认兑换',
         `确定要用 ${reward.cost} 积分兑换"${reward.name}"吗？`,
-        async () => {
+        () => {
+            // 扣除积分
             AppState.stats.totalPoints -= reward.cost;
             AppState.stats.totalRedeemed++;
 
-            await addHistoryRecord('redeem', reward.emoji + ' ' + reward.name, -reward.cost);
+            // 添加历史记录
+            addHistory('redeem', reward.emoji + ' ' + reward.name, -reward.cost);
 
-            await updateStats({
-                total_points: AppState.stats.totalPoints,
-                total_redeemed: AppState.stats.totalRedeemed
-            });
+            // 保存数据
+            saveData();
 
+            // 显示绚丽成功卡片
             DOM.rewardEmojiLarge.textContent = reward.emoji;
             DOM.rewardNameLarge.textContent = reward.name;
             DOM.rewardCostLarge.textContent = reward.cost;
             showModal('successModal');
 
+            // 更新 UI
             updateUI();
         }
     );
 }
 
-// 删除奖励
-function deleteRewardById(rewardId) {
+// 删除奖励 - 需要密码验证
+function deleteReward(rewardId) {
     requirePassword(() => {
         showConfirm(
             '🗑️',
             '删除奖励',
             '确定要删除这个奖励吗？',
-            async () => {
-                const success = await deleteReward(rewardId);
-                if (success) {
-                    AppState.rewards = AppState.rewards.filter(r => r.id !== rewardId);
-                    renderRewards();
-                }
+            () => {
+                AppState.rewards = AppState.rewards.filter(r => r.id !== rewardId);
+                saveData();
+                renderRewards();
             }
         );
     });
 }
 
+// 添加历史记录
+function addHistory(type, text, points) {
+    const record = {
+        id: Date.now(),
+        type: type,
+        text: text,
+        points: points,
+        time: new Date().toISOString()
+    };
+
+    AppState.history.unshift(record);
+
+    // 只保留最近100条记录
+    if (AppState.history.length > 100) {
+        AppState.history = AppState.history.slice(0, 100);
+    }
+}
+
 // 显示庆祝动画
 function showCelebration(points) {
-    if (DOM.earnedPoints) DOM.earnedPoints.textContent = points;
-    if (DOM.celebration) {
-        DOM.celebration.classList.add('show');
-        createConfetti();
-        setTimeout(() => {
-            DOM.celebration.classList.remove('show');
-        }, 1500);
-    }
+    DOM.earnedPoints.textContent = points;
+    DOM.celebration.classList.add('show');
+
+    // 创建彩带
+    createConfetti();
+
+    setTimeout(() => {
+        DOM.celebration.classList.remove('show');
+    }, 1500);
 }
 
 // 创建彩带效果
 function createConfetti() {
     const confetti = document.querySelector('.confetti');
-    if (!confetti) return;
     confetti.innerHTML = '';
 
     const colors = ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
@@ -702,16 +655,30 @@ function createConfetti() {
     }
 }
 
+// 添加彩带下落动画
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes confettiFall {
+        to {
+            top: 100%;
+            transform: rotate(${Math.random() * 720}deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
 // 更新 UI
 function updateUI() {
-    if (DOM.totalPoints) DOM.totalPoints.textContent = AppState.stats.totalPoints;
-    if (DOM.streakDays) DOM.streakDays.textContent = AppState.stats.streakDays;
-    if (DOM.shopPoints) DOM.shopPoints.textContent = AppState.stats.totalPoints;
+    DOM.totalPoints.textContent = AppState.stats.totalPoints;
+    DOM.streakDays.textContent = AppState.stats.streakDays;
+    DOM.shopPoints.textContent = AppState.stats.totalPoints;
 
-    if (DOM.totalCheckins) DOM.totalCheckins.textContent = AppState.stats.totalCheckins;
-    if (DOM.totalEarned) DOM.totalEarned.textContent = AppState.stats.totalEarned;
-    if (DOM.totalRedeemed) DOM.totalRedeemed.textContent = AppState.stats.totalRedeemed;
-    if (DOM.maxStreak) DOM.maxStreak.textContent = AppState.stats.maxStreak;
+    // 更新统计
+    DOM.totalCheckins.textContent = AppState.stats.totalCheckins;
+    DOM.totalEarned.textContent = AppState.stats.totalEarned;
+    DOM.totalRedeemed.textContent = AppState.stats.totalRedeemed;
+    DOM.maxStreak.textContent = AppState.stats.maxStreak;
 
     renderTasks();
     renderRewards();
@@ -722,8 +689,6 @@ function updateUI() {
 
 // 渲染任务列表
 function renderTasks() {
-    if (!DOM.tasksList) return;
-
     if (AppState.tasks.length === 0) {
         DOM.tasksList.innerHTML = `
             <div class="empty-state">
@@ -735,8 +700,8 @@ function renderTasks() {
     }
 
     DOM.tasksList.innerHTML = AppState.tasks.map(task => `
-        <div class="task-card ${task.completed ? 'completed' : ''}" onclick="toggleTaskById(${task.id})">
-            <button class="task-delete" onclick="event.stopPropagation(); deleteTaskById(${task.id})">✕</button>
+        <div class="task-card ${task.completed ? 'completed' : ''}" onclick="toggleTask(${task.id})">
+            <button class="task-delete" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
             <span class="task-emoji">${task.emoji}</span>
             <div class="task-content">
                 <div class="task-name">${task.name}</div>
@@ -749,8 +714,6 @@ function renderTasks() {
 
 // 渲染奖励列表
 function renderRewards() {
-    if (!DOM.shopList) return;
-
     if (AppState.rewards.length === 0) {
         DOM.shopList.innerHTML = `
             <div class="empty-state">
@@ -763,12 +726,12 @@ function renderRewards() {
 
     DOM.shopList.innerHTML = AppState.rewards.map(reward => `
         <div class="reward-card">
-            <button class="reward-delete" onclick="deleteRewardById(${reward.id})">✕</button>
+            <button class="reward-delete" onclick="deleteReward(${reward.id})">✕</button>
             <span class="reward-emoji">${reward.emoji}</span>
             <div class="reward-name">${reward.name}</div>
             <div class="reward-cost">${reward.cost} ⭐</div>
             <button class="redeem-btn" 
-                    onclick="redeemRewardById(${reward.id})"
+                    onclick="redeemReward(${reward.id})"
                     ${AppState.stats.totalPoints < reward.cost ? 'disabled' : ''}>
                 ${AppState.stats.totalPoints < reward.cost ? '积分不足' : '立即兑换'}
             </button>
@@ -778,8 +741,6 @@ function renderRewards() {
 
 // 渲染历史记录
 function renderHistory() {
-    if (!DOM.historyList) return;
-
     if (AppState.history.length === 0) {
         DOM.historyList.innerHTML = `
             <div class="empty-state">
@@ -791,13 +752,13 @@ function renderHistory() {
     }
 
     DOM.historyList.innerHTML = AppState.history.slice(0, 20).map(record => {
-        const date = new Date(record.created_at);
+        const date = new Date(record.time);
         const timeStr = date.toLocaleDateString('zh-CN') + ' ' +
             date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
         return `
             <div class="history-item">
-                <span class="history-icon">${record.type === 'checkin' ? '✅' : record.type === 'cancel' ? '❌' : '🎁'}</span>
+                <span class="history-icon">${record.type === 'checkin' ? '✅' : '🎁'}</span>
                 <div class="history-content">
                     <div class="history-text">${record.text}</div>
                     <div class="history-time">${timeStr}</div>
@@ -815,51 +776,61 @@ function updateProgress() {
     const total = AppState.tasks.length;
     const completed = AppState.tasks.filter(t => t.completed).length;
 
-    if (DOM.progressText) DOM.progressText.textContent = `${completed}/${total}`;
-    if (DOM.progressFill) DOM.progressFill.style.width = total > 0 ? `${(completed / total) * 100}%` : '0%';
+    DOM.progressText.textContent = `${completed}/${total}`;
+    DOM.progressFill.style.width = total > 0 ? `${(completed / total) * 100}%` : '0%';
 
+    // 检查是否所有任务都完成了，显示签名区域
     updateLockStatus();
 }
 
 /* ===================================
-   签名画布功能
+   签名画布功能 (Apple Pencil 支持)
    =================================== */
 
+// 签名画布状态
 let signatureCtx = null;
 let isDrawing = false;
 let hasSignature = false;
 let lastX = 0;
 let lastY = 0;
 
+// 初始化签名画布
 function initSignatureCanvas() {
     const canvas = DOM.signatureCanvas;
     if (!canvas) return;
 
     signatureCtx = canvas.getContext('2d');
+
+    // 设置画布尺寸
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // 设置画笔样式
     signatureCtx.strokeStyle = '#1e293b';
     signatureCtx.lineWidth = 3;
     signatureCtx.lineCap = 'round';
     signatureCtx.lineJoin = 'round';
 
+    // 鼠标事件
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
 
+    // 触摸事件 (Apple Pencil 支持)
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
     canvas.addEventListener('touchcancel', stopDrawing);
 
+    // Apple Pencil 压力感应支持
     canvas.addEventListener('pointerdown', handlePointerStart);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', stopDrawing);
     canvas.addEventListener('pointercancel', stopDrawing);
 }
 
+// 调整画布尺寸
 function resizeCanvas() {
     const canvas = DOM.signatureCanvas;
     if (!canvas) return;
@@ -870,18 +841,23 @@ function resizeCanvas() {
     const rect = wrapper.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
+    // 如果容器宽度为0，使用默认值或稍后重试
     let containerWidth = rect.width;
     if (containerWidth === 0) {
         containerWidth = wrapper.offsetWidth || canvas.offsetWidth || 300;
     }
 
     if (containerWidth === 0) {
+        // 如果还是0，稍后重试
         setTimeout(resizeCanvas, 100);
         return;
     }
 
+    // 设置画布实际尺寸（考虑像素比）
     canvas.width = containerWidth * dpr;
     canvas.height = 200 * dpr;
+
+    // 设置画布 CSS 尺寸
     canvas.style.width = containerWidth + 'px';
     canvas.style.height = '200px';
 
@@ -893,35 +869,44 @@ function resizeCanvas() {
     signatureCtx.lineJoin = 'round';
 }
 
+// 开始绘制
 function startDrawing(e) {
     isDrawing = true;
     const pos = getPosition(e);
     lastX = pos.x;
     lastY = pos.y;
-    if (DOM.signatureCanvas) DOM.signatureCanvas.classList.add('signing', 'active');
-    if (DOM.signaturePlaceholder) DOM.signaturePlaceholder.classList.add('hidden');
+
+    DOM.signatureCanvas.classList.add('signing', 'active');
+    DOM.signaturePlaceholder.classList.add('hidden');
 }
 
+// 绘制
 function draw(e) {
     if (!isDrawing) return;
+
     const pos = getPosition(e);
+
     signatureCtx.beginPath();
     signatureCtx.moveTo(lastX, lastY);
     signatureCtx.lineTo(pos.x, pos.y);
     signatureCtx.stroke();
+
     lastX = pos.x;
     lastY = pos.y;
     hasSignature = true;
 }
 
+// 停止绘制
 function stopDrawing() {
     isDrawing = false;
-    if (DOM.signatureCanvas) DOM.signatureCanvas.classList.remove('active');
+    DOM.signatureCanvas.classList.remove('active');
 }
 
+// 获取位置
 function getPosition(e) {
     const canvas = DOM.signatureCanvas;
     const rect = canvas.getBoundingClientRect();
+
     let clientX, clientY;
 
     if (e.touches && e.touches.length > 0) {
@@ -933,23 +918,35 @@ function getPosition(e) {
     } else {
         return { x: lastX, y: lastY };
     }
-    return { x: clientX - rect.left, y: clientY - rect.top };
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    return { x, y };
 }
 
+// 触摸开始
 function handleTouchStart(e) {
     e.preventDefault();
-    startDrawing(e.touches[0]);
+    const touch = e.touches[0];
+    startDrawing(touch);
 }
 
+// 触摸移动
 function handleTouchMove(e) {
     e.preventDefault();
     if (!isDrawing) return;
-    draw(e.touches[0]);
+    const touch = e.touches[0];
+    draw(touch);
 }
 
+// Pointer 事件 (Apple Pencil 压力感应)
 function handlePointerStart(e) {
     if (e.pointerType === 'pen' || e.pointerType === 'touch' || e.pointerType === 'mouse') {
-        if (e.pressure > 0) signatureCtx.lineWidth = 2 + e.pressure * 4;
+        // 根据压力调整线宽
+        if (e.pressure > 0) {
+            signatureCtx.lineWidth = 2 + e.pressure * 4;
+        }
         startDrawing(e);
     }
 }
@@ -957,158 +954,190 @@ function handlePointerStart(e) {
 function handlePointerMove(e) {
     if (!isDrawing) return;
     if (e.pointerType === 'pen' || e.pointerType === 'touch' || e.pointerType === 'mouse') {
-        if (e.pressure > 0) signatureCtx.lineWidth = 2 + e.pressure * 4;
+        // 根据压力调整线宽
+        if (e.pressure > 0) {
+            signatureCtx.lineWidth = 2 + e.pressure * 4;
+        }
         draw(e);
     }
 }
 
+// 清除签名
 function clearSignature() {
     const canvas = DOM.signatureCanvas;
     if (!canvas || !signatureCtx) return;
+
     const rect = canvas.getBoundingClientRect();
     signatureCtx.clearRect(0, 0, rect.width, rect.height);
     hasSignature = false;
     canvas.classList.remove('signing');
-    if (DOM.signaturePlaceholder) DOM.signaturePlaceholder.classList.remove('hidden');
+    if (DOM.signaturePlaceholder) {
+        DOM.signaturePlaceholder.classList.remove('hidden');
+    }
 }
 
-async function submitWithSignature() {
+// 提交并锁定
+function submitWithSignature() {
     if (!hasSignature) {
         alert('请先签名再提交！');
         return;
     }
 
+    // 检查是否有已完成的任务
     const completedCount = AppState.tasks.filter(t => t.completed).length;
     if (completedCount === 0) {
         alert('还没有完成任何任务哦！');
         return;
     }
 
+    // 保存签名图片
     const signatureData = DOM.signatureCanvas.toDataURL('image/png');
 
+    // 更新状态
     AppState.todayLocked = true;
     AppState.todaySignature = signatureData;
-    AppState.lockDate = new Date().toISOString().split('T')[0];
+    AppState.lockDate = new Date().toDateString();
 
-    await updateStats({
-        today_locked: true,
-        today_signature: signatureData,
-        lock_date: AppState.lockDate
-    });
-
+    saveData();
     updateLockStatus();
-    alert('今日打卡已提交并锁定！明天继续加油哦！🎉');
+
+    // 显示成功提示
+    DOM.successMessage.textContent = '今日打卡已提交并锁定！明天继续加油哦！🎉';
+    showModal('successModal');
 }
 
+// 更新锁定状态
 function updateLockStatus() {
     const total = AppState.tasks.length;
     const completed = AppState.tasks.filter(t => t.completed).length;
+    const allCompleted = total > 0 && completed === total;
 
     if (AppState.todayLocked) {
-        if (DOM.signatureSection) DOM.signatureSection.classList.remove('show');
-        if (DOM.lockedNotice) DOM.lockedNotice.classList.add('show');
-        if (DOM.tasksList) DOM.tasksList.classList.add('locked');
-        if (DOM.addTaskBtn) DOM.addTaskBtn.classList.add('hidden');
+        // 已锁定状态
+        DOM.signatureSection.classList.remove('show');
+        DOM.lockedNotice.classList.add('show');
+        DOM.tasksList.classList.add('locked');
+        DOM.addTaskBtn.classList.add('hidden');
 
-        if (AppState.todaySignature && DOM.lockedSignature) {
+        // 显示保存的签名
+        if (AppState.todaySignature) {
             DOM.lockedSignature.innerHTML = `<img src="${AppState.todaySignature}" alt="家长签名">`;
         }
     } else {
-        if (DOM.lockedNotice) DOM.lockedNotice.classList.remove('show');
-        if (DOM.tasksList) DOM.tasksList.classList.remove('locked');
-        if (DOM.addTaskBtn) DOM.addTaskBtn.classList.remove('hidden');
+        // 未锁定状态
+        DOM.lockedNotice.classList.remove('show');
+        DOM.tasksList.classList.remove('locked');
+        DOM.addTaskBtn.classList.remove('hidden');
 
+        // 如果有已完成的任务，显示签名区域
         if (completed > 0) {
-            const wasHidden = DOM.signatureSection && !DOM.signatureSection.classList.contains('show');
-            if (DOM.signatureSection) DOM.signatureSection.classList.add('show');
-            if (wasHidden) setTimeout(resizeCanvas, 50);
+            const wasHidden = !DOM.signatureSection.classList.contains('show');
+            DOM.signatureSection.classList.add('show');
+            // 如果签名区域刚刚显示，重新调整画布尺寸
+            if (wasHidden) {
+                setTimeout(resizeCanvas, 50);
+            }
         } else {
-            if (DOM.signatureSection) DOM.signatureSection.classList.remove('show');
+            DOM.signatureSection.classList.remove('show');
         }
     }
 }
 
-/* ===================================
-   密码验证
-   =================================== */
-
+// 待执行的密码保护操作
 let pendingAction = null;
 
+// 要求密码验证后执行操作
 function requirePassword(action) {
     pendingAction = action;
     showModal('passwordModal');
 }
 
-async function handlePasswordConfirm() {
+// 统一处理密码确认
+function handlePasswordConfirm() {
     const password = DOM.unlockPassword.value;
-    const isCorrect = await verifyFamilyPassword(password);
+    const correctPassword = '0000';
 
-    if (isCorrect) {
+    if (password === correctPassword) {
         hideModal('passwordModal');
         DOM.unlockPassword.value = '';
         DOM.passwordError.textContent = '';
 
+        // 如果有待执行的操作，执行它
         if (pendingAction) {
             const action = pendingAction;
             pendingAction = null;
             action();
         } else {
+            // 原来的解锁功能
             AppState.todayLocked = false;
             AppState.todaySignature = null;
             AppState.lockDate = null;
-
-            await updateStats({
-                today_locked: false,
-                today_signature: null,
-                lock_date: null
-            });
-
+            saveData();
             clearSignature();
             updateLockStatus();
             alert('已解锁！可以继续打卡了 💪');
         }
     } else {
+        // 密码错误
         DOM.passwordError.textContent = '密码错误，请重试';
         DOM.unlockPassword.value = '';
         DOM.unlockPassword.focus();
     }
 }
 
+// 验证密码 (保留用于向后兼容)
+function verifyPassword() {
+    handlePasswordConfirm();
+}
+
 /* ===================================
    自定义确认弹窗
    =================================== */
 
+// 确认回调函数
 let confirmCallback = null;
 
+// 显示确认弹窗
 function showConfirm(icon, title, message, callback) {
     DOM.confirmIcon.textContent = icon;
     DOM.confirmTitle.textContent = title;
     DOM.confirmMessage.textContent = message;
     confirmCallback = callback;
 
-    if (callback) {
-        DOM.confirmOk.style.display = 'block';
-        DOM.confirmOk.onclick = () => {
-            hideModal('confirmModal');
-            if (confirmCallback) confirmCallback();
-        };
-    } else {
+    // 如果没有回调函数，隐藏确定按钮只显示取消
+    if (callback === null) {
         DOM.confirmOk.style.display = 'none';
+        DOM.confirmCancel.textContent = '知道了';
+    } else {
+        DOM.confirmOk.style.display = 'block';
+        DOM.confirmCancel.textContent = '取消';
     }
 
-    DOM.confirmCancel.onclick = () => hideModal('confirmModal');
     showModal('confirmModal');
 }
 
-// 彩带动画样式
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes confettiFall {
-        to {
-            top: 100%;
-            transform: rotate(${Math.random() * 720}deg);
-            opacity: 0;
+// 确认弹窗确定按钮事件
+document.addEventListener('DOMContentLoaded', () => {
+    // 确认按钮
+    document.getElementById('confirmOk').addEventListener('click', () => {
+        hideModal('confirmModal');
+        if (confirmCallback) {
+            confirmCallback();
+            confirmCallback = null;
         }
-    }
-`;
-document.head.appendChild(style);
+    });
+
+    // 取消按钮
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+        hideModal('confirmModal');
+        confirmCallback = null;
+    });
+
+    // 点击弹窗外部关闭
+    document.getElementById('confirmModal').addEventListener('click', (e) => {
+        if (e.target.id === 'confirmModal') {
+            hideModal('confirmModal');
+            confirmCallback = null;
+        }
+    });
+});

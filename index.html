@@ -12,62 +12,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-    <!-- 登录页面 -->
-    <div class="login-page" id="loginPage">
-        <div class="login-container">
-            <div class="login-header">
-                <div class="login-icon">🌟</div>
-                <h1>小星星打卡</h1>
-                <p>让每一天都有进步</p>
-            </div>
-            <div class="login-form">
-                <div class="form-group">
-                    <label>家庭码</label>
-                    <input type="text" id="familyCodeInput" placeholder="请输入家庭码" class="text-input" maxlength="10">
-                </div>
-                <button class="btn btn-primary login-btn" id="loginBtn">进入</button>
-                <p class="login-hint">还没有家庭码？<a href="#" id="showCreateFamily">创建新家庭</a></p>
-            </div>
-            <div class="login-error" id="loginError"></div>
-        </div>
-    </div>
-
-    <!-- 创建家庭弹窗 -->
-    <div class="modal" id="createFamilyModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🏠 创建新家庭</h3>
-                <button class="modal-close" id="closeCreateFamily">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>家庭名称</label>
-                    <input type="text" id="newFamilyName" placeholder="例如：小明家" class="text-input">
-                </div>
-                <div class="form-group">
-                    <label>家庭码（用于登录）</label>
-                    <input type="text" id="newFamilyCode" placeholder="4-10位字母或数字" class="text-input" maxlength="10">
-                    <p class="input-hint">💡 建议使用简单好记的码，如：xiaoming</p>
-                </div>
-                <div class="form-group">
-                    <label>管理密码（用于添加/删除任务）</label>
-                    <input type="text" id="newFamilyPassword" placeholder="4位数字" class="text-input" maxlength="4"
-                        value="0000">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-cancel" id="cancelCreateFamily">取消</button>
-                <button class="btn btn-primary" id="confirmCreateFamily">创建家庭</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="app-container" id="appContainer" style="display: none;">
+    <div class="app-container">
         <!-- 顶部状态栏 -->
         <header class="header">
             <div class="header-left">
@@ -413,7 +361,6 @@
         </div>
     </div>
 
-    <script src="supabase.js"></script>
     <script src="app.js"></script>
 </body>
 
