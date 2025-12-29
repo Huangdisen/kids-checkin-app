@@ -412,38 +412,55 @@ function saveNewReward() {
 // 任务打卡
 function toggleTask(taskId) {
     const task = AppState.tasks.find(t => t.id === taskId);
-    if (!task || task.completed) return;
+    if (!task) return;
 
-    // 标记完成
-    task.completed = true;
+    if (task.completed) {
+        // 取消完成 - 扣除积分
+        task.completed = false;
+        AppState.stats.totalPoints -= task.points;
+        AppState.stats.totalEarned -= task.points;
+        AppState.stats.totalCheckins--;
 
-    // 更新积分
-    AppState.stats.totalPoints += task.points;
-    AppState.stats.totalEarned += task.points;
-    AppState.stats.totalCheckins++;
+        // 添加历史记录
+        addHistory('cancel', '❌ 取消: ' + task.emoji + ' ' + task.name, -task.points);
 
-    // 更新连续打卡
-    const today = new Date().toDateString();
-    if (AppState.stats.lastCheckInDate !== today) {
-        AppState.stats.streakDays++;
-        AppState.stats.lastCheckInDate = today;
+        // 保存数据
+        saveData();
 
-        if (AppState.stats.streakDays > AppState.stats.maxStreak) {
-            AppState.stats.maxStreak = AppState.stats.streakDays;
+        // 更新 UI
+        updateUI();
+    } else {
+        // 标记完成
+        task.completed = true;
+
+        // 更新积分
+        AppState.stats.totalPoints += task.points;
+        AppState.stats.totalEarned += task.points;
+        AppState.stats.totalCheckins++;
+
+        // 更新连续打卡
+        const today = new Date().toDateString();
+        if (AppState.stats.lastCheckInDate !== today) {
+            AppState.stats.streakDays++;
+            AppState.stats.lastCheckInDate = today;
+
+            if (AppState.stats.streakDays > AppState.stats.maxStreak) {
+                AppState.stats.maxStreak = AppState.stats.streakDays;
+            }
         }
+
+        // 添加历史记录
+        addHistory('checkin', task.emoji + ' ' + task.name, task.points);
+
+        // 保存数据
+        saveData();
+
+        // 显示庆祝动画
+        showCelebration(task.points);
+
+        // 更新 UI
+        updateUI();
     }
-
-    // 添加历史记录
-    addHistory('checkin', task.emoji + ' ' + task.name, task.points);
-
-    // 保存数据
-    saveData();
-
-    // 显示庆祝动画
-    showCelebration(task.points);
-
-    // 更新 UI
-    updateUI();
 }
 
 // 删除任务 (移到回收箱) - 需要密码验证
