@@ -182,46 +182,94 @@ function saveData() {
 
 // 同步到 Supabase 云端
 async function syncToCloud() {
-    if (typeof isSupabaseReady !== 'function' || !isSupabaseReady()) return;
+    console.log('syncToCloud 被调用');
+    console.log('isSupabaseReady:', typeof isSupabaseReady === 'function' ? isSupabaseReady() : 'function not found');
+
+    if (typeof isSupabaseReady !== 'function' || !isSupabaseReady()) {
+        console.log('Supabase 未就绪，跳过同步');
+        return;
+    }
 
     try {
+        console.log('开始推送数据到云端...');
         await syncTasksToCloud(AppState.tasks);
         await syncRewardsToCloud(AppState.rewards);
         await syncStatsToCloud(AppState.stats);
+        console.log('✅ 数据已成功推送到云端');
     } catch (error) {
         console.error('云端同步失败:', error);
     }
 }
 
-// 尝试从云端加载数据
+// 尝试从云端加载数据 - 优先云端数据以支持多设备同步
 async function tryLoadFromCloud() {
     if (typeof isSupabaseReady !== 'function' || !isSupabaseReady()) return;
 
-    // 如果本地已有数据，先同步到云端
-    if (AppState.tasks.length > 0) {
-        await syncToCloud();
-        console.log('本地数据已同步到云端');
-    } else {
-        // 本地没数据，尝试从云端加载
+    try {
+        // 始终先从云端加载最新数据
         const cloudTasks = await loadTasksFromCloud();
         const cloudRewards = await loadRewardsFromCloud();
         const cloudStats = await loadStatsFromCloud();
 
+        let hasCloudData = false;
+
+        // 如果云端有任务数据，使用云端数据
         if (cloudTasks && cloudTasks.length > 0) {
-            AppState.tasks = cloudTasks;
+            // 保留本地的完成状态（今天的打卡记录）
+            const localCompletedIds = AppState.tasks
+                .filter(t => t.completed)
+                .map(t => t.id);
+
+            AppState.tasks = cloudTasks.map(task => ({
+                ...task,
+                completed: localCompletedIds.includes(task.id) ? true : task.completed
+            }));
+            hasCloudData = true;
             console.log('从云端加载了任务');
         }
+
         if (cloudRewards && cloudRewards.length > 0) {
             AppState.rewards = cloudRewards;
+            hasCloudData = true;
             console.log('从云端加载了奖励');
         }
+
         if (cloudStats) {
-            AppState.stats = cloudStats;
+            // 使用云端统计，但保留较大的值（避免数据丢失）
+            AppState.stats = {
+                totalPoints: Math.max(cloudStats.totalPoints || 0, AppState.stats.totalPoints || 0),
+                streakDays: Math.max(cloudStats.streakDays || 0, AppState.stats.streakDays || 0),
+                maxStreak: Math.max(cloudStats.maxStreak || 0, AppState.stats.maxStreak || 0),
+                totalCheckins: Math.max(cloudStats.totalCheckins || 0, AppState.stats.totalCheckins || 0),
+                totalEarned: Math.max(cloudStats.totalEarned || 0, AppState.stats.totalEarned || 0),
+                totalRedeemed: Math.max(cloudStats.totalRedeemed || 0, AppState.stats.totalRedeemed || 0),
+                lastCheckInDate: cloudStats.lastCheckInDate || AppState.stats.lastCheckInDate
+            };
+            hasCloudData = true;
             console.log('从云端加载了统计');
         }
 
-        updateUI();
-        saveData(); // 保存到本地
+        if (hasCloudData) {
+            updateUI();
+            // 保存合并后的数据到本地
+            localStorage.setItem('kidsCheckinApp', JSON.stringify({
+                tasks: AppState.tasks,
+                rewards: AppState.rewards,
+                history: AppState.history,
+                recycleBin: AppState.recycleBin,
+                stats: AppState.stats,
+                todayLocked: AppState.todayLocked,
+                todaySignature: AppState.todaySignature,
+                lockDate: AppState.lockDate
+            }));
+            console.log('云端数据已同步到本地');
+        } else if (AppState.tasks.length > 0) {
+            // 云端没有数据，但本地有，上传到云端
+            await syncToCloud();
+            console.log('本地数据已同步到云端');
+        }
+    } catch (error) {
+        console.error('云端同步失败:', error);
     }
 }
 
