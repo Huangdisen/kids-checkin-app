@@ -239,18 +239,18 @@ async function tryLoadFromCloud() {
         }
 
         if (cloudStats) {
-            // 使用云端统计，但保留较大的值（避免数据丢失）
+            // 直接使用云端统计数据，确保多设备同步一致
             AppState.stats = {
-                totalPoints: Math.max(cloudStats.totalPoints || 0, AppState.stats.totalPoints || 0),
-                streakDays: Math.max(cloudStats.streakDays || 0, AppState.stats.streakDays || 0),
-                maxStreak: Math.max(cloudStats.maxStreak || 0, AppState.stats.maxStreak || 0),
-                totalCheckins: Math.max(cloudStats.totalCheckins || 0, AppState.stats.totalCheckins || 0),
-                totalEarned: Math.max(cloudStats.totalEarned || 0, AppState.stats.totalEarned || 0),
-                totalRedeemed: Math.max(cloudStats.totalRedeemed || 0, AppState.stats.totalRedeemed || 0),
+                totalPoints: cloudStats.totalPoints ?? AppState.stats.totalPoints ?? 0,
+                streakDays: cloudStats.streakDays ?? AppState.stats.streakDays ?? 0,
+                maxStreak: Math.max(cloudStats.maxStreak || 0, AppState.stats.maxStreak || 0), // 最长连续可以保留最大值
+                totalCheckins: cloudStats.totalCheckins ?? AppState.stats.totalCheckins ?? 0,
+                totalEarned: cloudStats.totalEarned ?? AppState.stats.totalEarned ?? 0,
+                totalRedeemed: cloudStats.totalRedeemed ?? AppState.stats.totalRedeemed ?? 0,
                 lastCheckInDate: cloudStats.lastCheckInDate || AppState.stats.lastCheckInDate
             };
             hasCloudData = true;
-            console.log('从云端加载了统计');
+            console.log('从云端加载了统计，积分:', AppState.stats.totalPoints);
         }
 
         if (cloudHistory && cloudHistory.length > 0) {
