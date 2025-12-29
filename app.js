@@ -28,6 +28,13 @@ const DOM = {};
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
+    // 先初始化 Supabase
+    if (!initSupabase()) {
+        console.error('Supabase 初始化失败，应用无法启动');
+        alert('网络连接失败，请刷新页面重试');
+        return;
+    }
+
     cacheDOM();
     bindLoginEvents();
 

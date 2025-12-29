@@ -7,7 +7,25 @@ const SUPABASE_URL = 'https://tpcpgwvbujxncnhegwqm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY3Bnd3ZidWp4bmNuaGVnd3FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5OTk3MDIsImV4cCI6MjA4MjU3NTcwMn0.gwzRe5E5JAEw7i0w0IzunKpVd9aIvmtDGG1dtbGux18';
 
 // 初始化 Supabase 客户端
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+let supabaseReady = false;
+
+function initSupabase() {
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseReady = true;
+            console.log('Supabase 初始化成功');
+            return true;
+        } else {
+            console.error('Supabase SDK 未加载');
+            return false;
+        }
+    } catch (error) {
+        console.error('Supabase 初始化失败:', error);
+        return false;
+    }
+}
 
 // 当前家庭信息
 let currentFamily = null;
