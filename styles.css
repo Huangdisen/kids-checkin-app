@@ -160,31 +160,28 @@ body {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* 连续打卡显示 */
-.streak-display {
+/* 电子时钟显示 */
+.clock-display {
     display: inline-flex;
     align-items: center;
     gap: var(--space-xs);
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-full);
     box-shadow: var(--shadow-sm);
 }
 
-.fire-icon {
+.clock-icon {
     font-size: var(--font-size-lg);
-    animation: flame 0.5s infinite alternate;
+    animation: pulse 2s infinite;
 }
 
-.streak-value {
+.clock-time {
     font-size: var(--font-size-lg);
     font-weight: 900;
     color: var(--text-white);
-}
-
-.streak-label {
-    font-size: var(--font-size-xs);
-    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
 }
 
 /* ===================================

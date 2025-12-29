@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 缓存 DOM 元素
 function cacheDOM() {
     DOM.totalPoints = document.getElementById('totalPoints');
-    DOM.streakDays = document.getElementById('streakDays');
+    DOM.digitalClock = document.getElementById('digitalClock');
     DOM.greeting = document.getElementById('greeting');
     DOM.currentDate = document.getElementById('currentDate');
     DOM.tasksList = document.getElementById('tasksList');
@@ -797,7 +797,6 @@ document.head.appendChild(style);
 // 更新 UI
 function updateUI() {
     DOM.totalPoints.textContent = AppState.stats.totalPoints;
-    DOM.streakDays.textContent = AppState.stats.streakDays;
     DOM.shopPoints.textContent = AppState.stats.totalPoints;
 
     // 更新统计
@@ -812,6 +811,22 @@ function updateUI() {
     renderRecycleBin();
     updateProgress();
 }
+
+// 更新电子时钟
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    if (DOM.digitalClock) {
+        DOM.digitalClock.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+}
+
+// 启动时钟
+setInterval(updateClock, 1000);
+updateClock();
+
 
 // 渲染任务列表
 function renderTasks() {
