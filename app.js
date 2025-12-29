@@ -835,11 +835,17 @@ function resizeCanvas() {
     const canvas = DOM.signatureCanvas;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const wrapper = canvas.parentElement;
+    const rect = wrapper.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
+    // 设置画布实际尺寸（考虑像素比）
     canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    canvas.height = 200 * dpr;
+
+    // 设置画布 CSS 尺寸
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '200px';
 
     signatureCtx = canvas.getContext('2d');
     signatureCtx.scale(dpr, dpr);
@@ -887,14 +893,20 @@ function getPosition(e) {
     const canvas = DOM.signatureCanvas;
     const rect = canvas.getBoundingClientRect();
 
-    let x, y;
+    let clientX, clientY;
+
     if (e.touches && e.touches.length > 0) {
-        x = e.touches[0].clientX - rect.left;
-        y = e.touches[0].clientY - rect.top;
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.clientX !== undefined) {
+        clientX = e.clientX;
+        clientY = e.clientY;
     } else {
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
+        return { x: lastX, y: lastY };
     }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
     return { x, y };
 }
@@ -939,10 +951,15 @@ function handlePointerMove(e) {
 // 清除签名
 function clearSignature() {
     const canvas = DOM.signatureCanvas;
-    signatureCtx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!canvas || !signatureCtx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    signatureCtx.clearRect(0, 0, rect.width, rect.height);
     hasSignature = false;
-    DOM.signatureCanvas.classList.remove('signing');
-    DOM.signaturePlaceholder.classList.remove('hidden');
+    canvas.classList.remove('signing');
+    if (DOM.signaturePlaceholder) {
+        DOM.signaturePlaceholder.classList.remove('hidden');
+    }
 }
 
 // 提交并锁定
