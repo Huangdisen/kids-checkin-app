@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>🌟 小星星打卡</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- 顶部状态栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="points-display">
+                    <span class="star-icon">⭐</span>
+                    <span class="points-value" id="totalPoints">0</span>
+                    <span class="points-label">积分</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">🌟 小星星打卡</h1>
+                <p class="greeting" id="greeting">早上好，小朋友！</p>
+            </div>
+            <div class="header-right">
+                <div class="streak-display">
+                    <span class="fire-icon">🔥</span>
+                    <span class="streak-value" id="streakDays">0</span>
+                    <span class="streak-label">天连续打卡</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 首页 - 任务列表 -->
+            <section class="page active" id="homePage">
+                <div class="page-header">
+                    <h2 class="section-title">📅 今日任务</h2>
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+
+                <div class="tasks-container" id="tasksList">
+                    <!-- 任务卡片将通过 JS 动态生成 -->
+                </div>
+
+                <button class="add-task-btn" id="addTaskBtn">
+                    <span class="plus-icon">➕</span>
+                    <span>添加新任务</span>
+                </button>
+
+                <!-- 今日进度 -->
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <span>今日进度</span>
+                        <span id="progressText">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- 家长签名区域 -->
+                <div class="signature-section" id="signatureSection">
+                    <div class="signature-header">
+                        <h3>✍️ 家长签名确认</h3>
+                        <p class="signature-hint">请家长使用 Apple Pencil 或手指签名确认</p>
+                    </div>
+                    <div class="signature-canvas-wrapper">
+                        <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                        <div class="signature-placeholder" id="signaturePlaceholder">
+                            <span>← 在此签名 →</span>
+                        </div>
+                    </div>
+                    <div class="signature-actions">
+                        <button class="btn btn-cancel" id="clearSignature">清除签名</button>
+                        <button class="btn btn-primary" id="submitWithSignature">提交并锁定</button>
+                    </div>
+                </div>
+
+                <!-- 已锁定状态 -->
+                <div class="locked-notice" id="lockedNotice">
+                    <div class="locked-icon">🔒</div>
+                    <div class="locked-content">
+                        <h3>今日打卡已完成</h3>
+                        <p>家长已签名确认，明天继续加油！</p>
+                        <div class="locked-signature" id="lockedSignature"></div>
+                    </div>
+                    <button class="btn-unlock" id="unlockBtn">🔓 补打卡</button>
+                </div>
+            </section>
+
+            <!-- 积分商城 -->
+            <section class="page" id="shopPage">
+                <div class="page-header">
+                    <h2 class="section-title">🛒 积分商城</h2>
+                    <div class="my-points">
+                        我的积分：<span id="shopPoints">0</span> ⭐
+                    </div>
+                </div>
+
+                <div class="shop-container" id="shopList">
+                    <!-- 商品卡片将通过 JS 动态生成 -->
+                </div>
+
+                <button class="add-reward-btn" id="addRewardBtn">
+                    <span class="plus-icon">🎁</span>
+                    <span>添加新奖励</span>
+                </button>
+            </section>
+
+            <!-- 历史记录 -->
+            <section class="page" id="historyPage">
+                <div class="page-header">
+                    <h2 class="section-title">📊 历史记录</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="totalCheckins">0</div>
+                        <div class="stat-label">累计打卡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value" id="totalEarned">0</div>
+                        <div class="stat-label">累计获得积分</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎁</div>
+                        <div class="stat-value" id="totalRedeemed">0</div>
+                        <div class="stat-label">已兑换奖励</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="maxStreak">0</div>
+                        <div class="stat-label">最长连续打卡</div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <h3 class="history-title">📝 最近记录</h3>
+                    <div class="history-list" id="historyList">
+                        <!-- 历史记录将通过 JS 动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 回收箱 -->
+            <section class="page" id="recycleBinPage">
+                <div class="page-header">
+                    <h2 class="section-title">🗑️ 回收箱</h2>
+                    <p class="recycle-hint">删除的任务会保留在这里，可随时还原</p>
+                </div>
+
+                <div class="recycle-container" id="recycleList">
+                    <!-- 回收箱内容通过 JS 动态生成 -->
+                </div>
+
+                <div class="recycle-empty" id="recycleEmpty">
+                    <div class="empty-icon">🎉</div>
+                    <p>回收箱是空的</p>
+                    <p class="empty-hint">删除的任务会出现在这里哦</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="homePage">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">首页</span>
+            </button>
+            <button class="nav-btn" data-page="shopPage">
+                <span class="nav-icon">🛒</span>
+                <span class="nav-label">商城</span>
+            </button>
+            <button class="nav-btn" data-page="recycleBinPage">
+                <span class="nav-icon">🗑️</span>
+                <span class="nav-label">回收箱</span>
+            </button>
+            <button class="nav-btn" data-page="historyPage">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">记录</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 添加任务弹窗 -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✨ 添加新任务</h3>
+                <button class="modal-close" id="closeTaskModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>任务名称</label>
+                    <div class="input-with-emoji">
+                        <select id="taskEmoji" class="emoji-select">
+                            <option value="📚">📚</option>
+                            <option value="🎹">🎹</option>
+                            <option value="🏃">🏃</option>
+                            <option value="🧹">🧹</option>
+                            <option value="🦷">🦷</option>
+                            <option value="😴">😴</option>
+                            <option value="☀️">☀️</option>
+                            <option value="🍎">🍎</option>
+                            <option value="✏️">✏️</option>
+                            <option value="🎨">🎨</option>
+                            <option value="🎵">🎵</option>
+                            <option value="💪">💪</option>
+                        </select>
+                        <input type="text" id="taskName" placeholder="例如：阅读30分钟" class="text-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>积分奖励</label>
+                    <div class="points-selector">
+                        <button class="points-option" data-points="5">5⭐</button>
+                        <button class="points-option" data-points="10">10⭐</button>
+                        <button class="points-option active" data-points="15">15⭐</button>
+                        <button class="points-option" data-points="20">20⭐</button>
+                        <button class="points-option" data-points="30">30⭐</button>
+                    </div>
+                    <input type="hidden" id="taskPoints" value="15">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelTask">取消</button>
+                <button class="btn btn-primary" id="saveTask">保存任务</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加奖励弹窗 -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎁 添加新奖励</h3>
+                <button class="modal-close" id="closeRewardModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>奖励名称</label>
+                    <div class="input-with-emoji">
+                        <select id="rewardEmoji" class="emoji-select">
+                            <option value="🍦">🍦</option>
+                            <option value="🎮">🎮</option>
+                            <option value="📺">📺</option>
+                            <option value="🎬">🎬</option>
+                            <option value="🧸">🧸</option>
+                            <option value="🎈">🎈</option>
+                            <option value="🍰">🍰</option>
+                            <option value="🎁">🎁</option>
+                            <option value="⭐">⭐</option>
+                            <option value="🌟">🌟</option>
+                        </select>
+                        <input type="text" id="rewardName" placeholder="例如：看30分钟动画片" class="text-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>所需积分</label>
+                    <div class="points-selector">
+                        <button class="points-option" data-points="50">50⭐</button>
+                        <button class="points-option active" data-points="100">100⭐</button>
+                        <button class="points-option" data-points="150">150⭐</button>
+                        <button class="points-option" data-points="200">200⭐</button>
+                        <button class="points-option" data-points="500">500⭐</button>
+                    </div>
+                    <input type="hidden" id="rewardPoints" value="100">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelReward">取消</button>
+                <button class="btn btn-primary" id="saveReward">保存奖励</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打卡成功动画 -->
+    <div class="celebration" id="celebration">
+        <div class="confetti"></div>
+        <div class="points-popup">
+            <span class="popup-text">+<span id="earnedPoints">10</span>⭐</span>
+        </div>
+    </div>
+
+    <!-- 兑换成功弹窗 - 绚丽卡片 -->
+    <div class="modal" id="successModal">
+        <div class="reward-card-wrapper">
+            <div class="reward-card">
+                <div class="reward-card-confetti"></div>
+                <div class="reward-card-glow"></div>
+                <div class="reward-card-header">
+                    <div class="reward-stars">✨ � ✨</div>
+                    <h2 class="reward-card-title">🎉 兑换成功！</h2>
+                </div>
+                <div class="reward-card-body">
+                    <div class="reward-item-display">
+                        <span class="reward-emoji-large" id="rewardEmojiLarge">🎁</span>
+                    </div>
+                    <p class="reward-name-large" id="rewardNameLarge"></p>
+                    <div class="reward-cost-badge">
+                        <span id="rewardCostLarge">0</span> ⭐ 积分
+                    </div>
+                </div>
+                <div class="reward-card-footer">
+                    <p class="show-parents">🥳 展示给爸妈看吧！</p>
+                    <button class="btn btn-rainbow" id="closeSuccessModal">太棒了！</button>
+                </div>
+                <div class="reward-card-sparkles">
+                    <span class="sparkle s1">✨</span>
+                    <span class="sparkle s2">⭐</span>
+                    <span class="sparkle s3">🌟</span>
+                    <span class="sparkle s4">✨</span>
+                    <span class="sparkle s5">⭐</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码验证弹窗 -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content password-content">
+            <div class="modal-header">
+                <h3>🔐 家长验证</h3>
+                <button class="modal-close" id="closePasswordModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="password-hint">请输入家长密码解锁补打卡</p>
+                <div class="password-input-wrapper">
+                    <input type="password" id="unlockPassword" class="password-input" placeholder="请输入密码" maxlength="4">
+                </div>
+                <p class="password-error" id="passwordError"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelPassword">取消</button>
+                <button class="btn btn-primary" id="confirmPassword">确认解锁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content confirm-content">
+            <div class="confirm-icon" id="confirmIcon">⚠️</div>
+            <h3 class="confirm-title" id="confirmTitle">确认操作</h3>
+            <p class="confirm-message" id="confirmMessage">确定要执行此操作吗？</p>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="confirmCancel">取消</button>
+                <button class="btn btn-danger" id="confirmOk">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

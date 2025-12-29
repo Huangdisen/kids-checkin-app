@@ -1,0 +1,1711 @@
+/* ===================================
+   儿童打卡积分系统 - 样式表
+   针对 iPad Pro 优化的儿童友好设计
+   =================================== */
+
+/* CSS 变量定义 */
+:root {
+    /* 主色调 - 柔和的紫色渐变 */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --primary-dark: #5a67d8;
+
+    /* 辅助色 */
+    --success-color: #10b981;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger-color: #ef4444;
+    --danger-light: #fee2e2;
+
+    /* 背景色 */
+    --bg-primary: linear-gradient(180deg, #e8f0fe 0%, #f0f4ff 50%, #fce7f3 100%);
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-overlay: rgba(0, 0, 0, 0.5);
+
+    /* 文字颜色 */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-white: #ffffff;
+
+    /* 阴影 */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+    --shadow-glow: 0 0 20px rgba(102, 126, 234, 0.4);
+
+    /* 圆角 */
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    --radius-full: 100px;
+
+    /* 间距 */
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 20px;
+    --space-lg: 32px;
+    --space-xl: 48px;
+
+    /* 字体 */
+    --font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-size-xs: 14px;
+    --font-size-sm: 16px;
+    --font-size-md: 18px;
+    --font-size-lg: 24px;
+    --font-size-xl: 32px;
+    --font-size-xxl: 48px;
+}
+
+/* 全局重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* 应用容器 */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1366px;
+    margin: 0 auto;
+    padding: var(--space-md);
+}
+
+/* ===================================
+   顶部导航栏
+   =================================== */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-md);
+}
+
+.header-left,
+.header-right {
+    flex: 1;
+}
+
+.header-center {
+    flex: 2;
+    text-align: center;
+}
+
+.header-right {
+    text-align: right;
+}
+
+.app-title {
+    font-size: var(--font-size-xl);
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+}
+
+.greeting {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* 积分显示 */
+.points-display {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+}
+
+.star-icon {
+    font-size: var(--font-size-lg);
+    animation: pulse 2s infinite;
+}
+
+.points-value {
+    font-size: var(--font-size-lg);
+    font-weight: 900;
+    color: var(--text-white);
+}
+
+.points-label {
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 连续打卡显示 */
+.streak-display {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+}
+
+.fire-icon {
+    font-size: var(--font-size-lg);
+    animation: flame 0.5s infinite alternate;
+}
+
+.streak-value {
+    font-size: var(--font-size-lg);
+    font-weight: 900;
+    color: var(--text-white);
+}
+
+.streak-label {
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ===================================
+   主内容区域
+   =================================== */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 var(--space-sm);
+    scroll-behavior: smooth;
+}
+
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 4px;
+}
+
+/* 页面切换 */
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.date-display {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+}
+
+/* ===================================
+   任务卡片
+   =================================== */
+.tasks-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.task-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--primary-gradient);
+    border-radius: 0 3px 3px 0;
+}
+
+.task-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.task-card.completed {
+    background: var(--success-light);
+}
+
+.task-card.completed::before {
+    background: var(--success-color);
+}
+
+.task-emoji {
+    font-size: var(--font-size-xxl);
+    flex-shrink: 0;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-name {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.task-points {
+    font-size: var(--font-size-sm);
+    color: var(--warning-color);
+    font-weight: 500;
+}
+
+.task-check {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.task-card.completed .task-check {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.task-card.completed .task-check::after {
+    content: '✓';
+}
+
+.task-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--danger-light);
+    color: var(--danger-color);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-card:hover .task-delete {
+    opacity: 1;
+}
+
+/* 添加任务按钮 */
+.add-task-btn,
+.add-reward-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 3px dashed rgba(102, 126, 234, 0.3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: var(--space-lg);
+}
+
+.add-task-btn:hover,
+.add-reward-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.02);
+}
+
+.plus-icon {
+    font-size: var(--font-size-lg);
+}
+
+/* 进度条 */
+.progress-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.progress-bar {
+    height: 16px;
+    background: #e2e8f0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-full);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+}
+
+/* ===================================
+   积分商城
+   =================================== */
+.my-points {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--warning-color);
+}
+
+.shop-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.reward-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.reward-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.reward-emoji {
+    font-size: 64px;
+    margin-bottom: var(--space-sm);
+    display: block;
+}
+
+.reward-name {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.reward-cost {
+    font-size: var(--font-size-sm);
+    color: var(--warning-color);
+    font-weight: 500;
+    margin-bottom: var(--space-md);
+}
+
+.redeem-btn {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: var(--radius-full);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.redeem-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-glow);
+}
+
+.redeem-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.reward-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--danger-light);
+    color: var(--danger-color);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reward-card:hover .reward-delete {
+    opacity: 1;
+}
+
+/* ===================================
+   历史记录
+   =================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-icon {
+    font-size: var(--font-size-xxl);
+    margin-bottom: var(--space-sm);
+}
+
+.stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.history-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.history-title {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+}
+
+.history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.history-icon {
+    font-size: var(--font-size-lg);
+}
+
+.history-content {
+    flex: 1;
+}
+
+.history-text {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.history-time {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.history-points {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.history-points.positive {
+    color: var(--success-color);
+}
+
+.history-points.negative {
+    color: var(--danger-color);
+}
+
+/* ===================================
+   底部导航
+   =================================== */
+.bottom-nav {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-top: var(--space-md);
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-sm) var(--space-xl);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.nav-btn.active {
+    background: var(--primary-gradient);
+}
+
+.nav-icon {
+    font-size: var(--font-size-xl);
+}
+
+.nav-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.nav-btn.active .nav-label {
+    color: white;
+}
+
+/* ===================================
+   弹窗
+   =================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-overlay);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    width: 90%;
+    max-width: 480px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.modal-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+}
+
+.modal-close {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 50%;
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: #e2e8f0;
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.input-with-emoji {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.emoji-select {
+    width: 60px;
+    height: 50px;
+    font-size: var(--font-size-lg);
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    cursor: pointer;
+}
+
+.text-input {
+    flex: 1;
+    height: 50px;
+    padding: 0 var(--space-md);
+    font-size: var(--font-size-sm);
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    transition: border-color 0.2s;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.points-selector {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.points-option {
+    padding: var(--space-sm) var(--space-md);
+    background: #f1f5f9;
+    border: 2px solid transparent;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.points-option:hover {
+    background: #e2e8f0;
+}
+
+.points-option.active {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.modal-footer {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.btn {
+    flex: 1;
+    padding: var(--space-md);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-glow);
+}
+
+/* 成功弹窗 */
+.success-content {
+    text-align: center;
+    padding: var(--space-xl);
+}
+
+.success-icon {
+    font-size: 80px;
+    margin-bottom: var(--space-md);
+    animation: bounce 0.5s ease;
+}
+
+.success-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+}
+
+.success-message {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+/* ===================================
+   打卡庆祝动画
+   =================================== */
+.celebration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 2000;
+    display: none;
+}
+
+.celebration.show {
+    display: block;
+}
+
+.points-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pointsPopup 1s ease forwards;
+}
+
+.popup-text {
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--warning-color);
+    text-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+}
+
+.confetti {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===================================
+   动画
+   =================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes flame {
+    0% {
+        transform: scale(1) rotate(-3deg);
+    }
+
+    100% {
+        transform: scale(1.1) rotate(3deg);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+@keyframes pointsPopup {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(1);
+    }
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ===================================
+   响应式适配
+   =================================== */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --space-md: 16px;
+        --space-lg: 24px;
+        --font-size-xl: 28px;
+        --font-size-xxl: 40px;
+    }
+
+    .tasks-container,
+    .shop-container {
+        grid-template-columns: 1fr;
+    }
+
+    .bottom-nav {
+        gap: var(--space-md);
+    }
+
+    .nav-btn {
+        padding: var(--space-sm) var(--space-lg);
+    }
+}
+
+/* iPad Pro 横屏优化 */
+@media (min-width: 1024px) and (orientation: landscape) {
+    .app-container {
+        padding: var(--space-lg);
+    }
+
+    .tasks-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .shop-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: var(--font-size-md);
+}
+
+/* ===================================
+   家长签名区域
+   =================================== */
+.signature-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    margin-top: var(--space-lg);
+    display: none;
+}
+
+.signature-section.show {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+.signature-header {
+    text-align: center;
+    margin-bottom: var(--space-md);
+}
+
+.signature-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.signature-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.signature-canvas-wrapper {
+    position: relative;
+    margin-bottom: var(--space-md);
+}
+
+.signature-canvas {
+    width: 100%;
+    height: 200px;
+    background: #fafbfc;
+    border: 3px dashed #e2e8f0;
+    border-radius: var(--radius-md);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.signature-canvas.signing {
+    border-color: var(--primary-color);
+    border-style: solid;
+}
+
+.signature-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-lg);
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.signature-placeholder.hidden {
+    opacity: 0;
+}
+
+.signature-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.signature-actions .btn {
+    flex: 1;
+}
+
+/* ===================================
+   已锁定状态
+   =================================== */
+.locked-notice {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    margin-top: var(--space-lg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+.locked-notice.show {
+    display: flex;
+    animation: slideUp 0.3s ease;
+}
+
+.locked-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+    animation: bounce 1s ease infinite;
+}
+
+.locked-content h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+}
+
+.locked-content p {
+    font-size: var(--font-size-md);
+    opacity: 0.9;
+    margin-bottom: var(--space-md);
+}
+
+.locked-signature {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.locked-signature img {
+    max-width: 100%;
+    max-height: 100px;
+    border-radius: var(--radius-sm);
+}
+
+.btn-unlock {
+    padding: var(--space-sm) var(--space-lg);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-full);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-unlock:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* ===================================
+   密码弹窗
+   =================================== */
+.password-content {
+    text-align: center;
+}
+
+.password-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.password-input-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
+}
+
+.password-input {
+    width: 200px;
+    height: 60px;
+    text-align: center;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    letter-spacing: 8px;
+    border: 3px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s;
+}
+
+.password-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.password-error {
+    font-size: var(--font-size-sm);
+    color: var(--danger-color);
+    min-height: 24px;
+}
+
+/* ===================================
+   确认弹窗
+   =================================== */
+.confirm-content {
+    text-align: center;
+    padding: var(--space-xl);
+}
+
+.confirm-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+}
+
+.confirm-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+.confirm-message {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+/* ===================================
+   锁定状态下的任务卡片
+   =================================== */
+.tasks-container.locked .task-card {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.tasks-container.locked .task-delete {
+    display: none;
+}
+
+.add-task-btn.hidden,
+.signature-section.hidden {
+    display: none;
+}
+
+/* ===================================
+   Apple Pencil 优化
+   =================================== */
+@supports (-webkit-touch-callout: none) {
+    .signature-canvas {
+        /* 优化 Apple Pencil 响应 */
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+/* 签名时的视觉反馈 */
+.signature-canvas.active {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+}
+
+/* ===================================
+   回收箱页面
+   =================================== */
+.recycle-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.recycle-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.recycle-item {
+    background: var(--card-background);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    opacity: 0.8;
+    border: 2px dashed var(--border-color);
+}
+
+.recycle-item-icon {
+    font-size: 2rem;
+    opacity: 0.6;
+}
+
+.recycle-item-info {
+    flex: 1;
+}
+
+.recycle-item-name {
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
+
+.recycle-item-points {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+.recycle-item-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.btn-restore {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-restore:hover {
+    transform: scale(1.05);
+}
+
+.btn-delete-permanent {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-permanent:hover {
+    transform: scale(1.05);
+}
+
+.recycle-empty {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--text-secondary);
+    display: none;
+}
+
+.recycle-empty .empty-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+}
+
+.recycle-empty .empty-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+/* ===================================
+   绚丽奖励兑换卡片
+   =================================== */
+.reward-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-lg);
+}
+
+.reward-card {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    border-radius: 24px;
+    padding: var(--space-xl);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow:
+        0 20px 60px rgba(102, 126, 234, 0.4),
+        0 0 0 2px rgba(255, 255, 255, 0.2) inset;
+    animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+@keyframes cardPop {
+    0% {
+        transform: scale(0.5) rotate(-5deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+.reward-card-confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle, #fff 2px, transparent 2px),
+        radial-gradient(circle, #ffd700 2px, transparent 2px),
+        radial-gradient(circle, #ff6b6b 2px, transparent 2px);
+    background-size: 60px 60px, 80px 80px, 100px 100px;
+    background-position: 0 0, 30px 30px, 50px 10px;
+    animation: confettiFloat 3s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes confettiFloat {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-60px);
+    }
+}
+
+.reward-card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+    animation: glowRotate 6s linear infinite;
+}
+
+@keyframes glowRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.reward-card-header {
+    position: relative;
+    z-index: 1;
+}
+
+.reward-stars {
+    font-size: 24px;
+    margin-bottom: var(--space-sm);
+    animation: starPulse 1s ease-in-out infinite;
+}
+
+@keyframes starPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.reward-card-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    margin: 0;
+}
+
+.reward-card-body {
+    position: relative;
+    z-index: 1;
+    margin: var(--space-xl) 0;
+}
+
+.reward-item-display {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.reward-emoji-large {
+    font-size: 64px;
+}
+
+.reward-name-large {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 var(--space-sm);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.reward-cost-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: var(--font-size-md);
+}
+
+.reward-card-footer {
+    position: relative;
+    z-index: 1;
+}
+
+.show-parents {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--space-md);
+    font-weight: 600;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.btn-rainbow {
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);
+    background-size: 400% 100%;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    padding: var(--space-md) var(--space-2xl);
+    border-radius: 30px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    animation: rainbowMove 3s linear infinite;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-rainbow:hover {
+    transform: scale(1.05);
+}
+
+@keyframes rainbowMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 400% 50%;
+    }
+}
+
+.reward-card-sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sparkle {
+    position: absolute;
+    font-size: 20px;
+    animation: sparkleFloat 3s ease-in-out infinite;
+}
+
+.sparkle.s1 {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.sparkle.s2 {
+    top: 20%;
+    right: 15%;
+    animation-delay: 0.5s;
+}
+
+.sparkle.s3 {
+    bottom: 30%;
+    left: 8%;
+    animation-delay: 1s;
+}
+
+.sparkle.s4 {
+    bottom: 15%;
+    right: 10%;
+    animation-delay: 1.5s;
+}
+
+.sparkle.s5 {
+    top: 50%;
+    right: 5%;
+    animation-delay: 2s;
+}
+
+@keyframes sparkleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-15px) scale(1.2);
+        opacity: 0.6;
+    }
+}
