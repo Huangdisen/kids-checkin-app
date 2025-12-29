@@ -836,15 +836,29 @@ function resizeCanvas() {
     if (!canvas) return;
 
     const wrapper = canvas.parentElement;
+    if (!wrapper) return;
+
     const rect = wrapper.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
+    // 如果容器宽度为0，使用默认值或稍后重试
+    let containerWidth = rect.width;
+    if (containerWidth === 0) {
+        containerWidth = wrapper.offsetWidth || canvas.offsetWidth || 300;
+    }
+
+    if (containerWidth === 0) {
+        // 如果还是0，稍后重试
+        setTimeout(resizeCanvas, 100);
+        return;
+    }
+
     // 设置画布实际尺寸（考虑像素比）
-    canvas.width = rect.width * dpr;
+    canvas.width = containerWidth * dpr;
     canvas.height = 200 * dpr;
 
     // 设置画布 CSS 尺寸
-    canvas.style.width = rect.width + 'px';
+    canvas.style.width = containerWidth + 'px';
     canvas.style.height = '200px';
 
     signatureCtx = canvas.getContext('2d');
@@ -1017,7 +1031,12 @@ function updateLockStatus() {
 
         // 如果有已完成的任务，显示签名区域
         if (completed > 0) {
+            const wasHidden = !DOM.signatureSection.classList.contains('show');
             DOM.signatureSection.classList.add('show');
+            // 如果签名区域刚刚显示，重新调整画布尺寸
+            if (wasHidden) {
+                setTimeout(resizeCanvas, 50);
+            }
         } else {
             DOM.signatureSection.classList.remove('show');
         }
