@@ -195,6 +195,9 @@ async function syncToCloud() {
         await syncTasksToCloud(AppState.tasks);
         await syncRewardsToCloud(AppState.rewards);
         await syncStatsToCloud(AppState.stats);
+        if (typeof syncHistoryToCloud === 'function') {
+            await syncHistoryToCloud(AppState.history);
+        }
         console.log('✅ 数据已成功推送到云端');
     } catch (error) {
         console.error('云端同步失败:', error);
@@ -210,6 +213,7 @@ async function tryLoadFromCloud() {
         const cloudTasks = await loadTasksFromCloud();
         const cloudRewards = await loadRewardsFromCloud();
         const cloudStats = await loadStatsFromCloud();
+        const cloudHistory = typeof loadHistoryFromCloud === 'function' ? await loadHistoryFromCloud() : null;
 
         let hasCloudData = false;
 
@@ -247,6 +251,12 @@ async function tryLoadFromCloud() {
             };
             hasCloudData = true;
             console.log('从云端加载了统计');
+        }
+
+        if (cloudHistory && cloudHistory.length > 0) {
+            AppState.history = cloudHistory;
+            hasCloudData = true;
+            console.log('从云端加载了历史记录');
         }
 
         if (hasCloudData) {

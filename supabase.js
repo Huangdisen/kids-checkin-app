@@ -237,6 +237,64 @@ async function loadStatsFromCloud() {
     }
 }
 
+// 同步历史记录到云端
+async function syncHistoryToCloud(history) {
+    if (!supabaseReady) return;
+
+    try {
+        // 删除旧历史记录
+        await supabaseClient
+            .from('history')
+            .delete()
+            .eq('family_id', currentFamilyId);
+
+        // 插入新历史记录（最多保留50条）
+        if (history.length > 0) {
+            const cloudHistory = history.slice(0, 50).map(record => ({
+                family_id: currentFamilyId,
+                type: record.type,
+                text: record.text,
+                points: record.points,
+                created_at: record.time || new Date().toISOString()
+            }));
+
+            await supabaseClient
+                .from('history')
+                .insert(cloudHistory);
+        }
+        console.log('历史记录同步成功');
+    } catch (error) {
+        console.error('历史记录同步失败:', error);
+    }
+}
+
+// 从云端加载历史记录
+async function loadHistoryFromCloud() {
+    if (!supabaseReady) return null;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('history')
+            .select('*')
+            .eq('family_id', currentFamilyId)
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (error) throw error;
+
+        return data.map(record => ({
+            id: record.id,
+            type: record.type,
+            text: record.text,
+            points: record.points,
+            time: record.created_at
+        }));
+    } catch (error) {
+        console.error('加载历史记录失败:', error);
+        return null;
+    }
+}
+
 // 检查 Supabase 是否就绪
 function isSupabaseReady() {
     return supabaseReady;
@@ -250,4 +308,6 @@ window.syncRewardsToCloud = syncRewardsToCloud;
 window.loadRewardsFromCloud = loadRewardsFromCloud;
 window.syncStatsToCloud = syncStatsToCloud;
 window.loadStatsFromCloud = loadStatsFromCloud;
+window.syncHistoryToCloud = syncHistoryToCloud;
+window.loadHistoryFromCloud = loadHistoryFromCloud;
 window.isSupabaseReady = isSupabaseReady;
