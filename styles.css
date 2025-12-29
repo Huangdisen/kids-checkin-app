@@ -1709,3 +1709,138 @@ body {
         opacity: 0.6;
     }
 }
+
+/* ===================================
+   登录页面样式
+   =================================== */
+.login-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.login-page.hidden {
+    display: none;
+}
+
+.login-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    animation: slideUp 0.5s ease;
+}
+
+.login-header {
+    margin-bottom: var(--space-xl);
+}
+
+.login-icon {
+    font-size: 80px;
+    margin-bottom: var(--space-md);
+    animation: pulse 2s ease infinite;
+}
+
+.login-header h1 {
+    font-size: var(--font-size-xxl);
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--space-sm);
+}
+
+.login-header p {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+}
+
+.login-form {
+    margin-bottom: var(--space-md);
+}
+
+.login-form .form-group {
+    margin-bottom: var(--space-lg);
+    text-align: left;
+}
+
+.login-form .text-input {
+    width: 100%;
+    height: 56px;
+    font-size: var(--font-size-md);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.login-btn {
+    width: 100%;
+    height: 56px;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+}
+
+.login-hint {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.login-hint a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-hint a:hover {
+    text-decoration: underline;
+}
+
+.login-error {
+    color: var(--danger-color);
+    font-size: var(--font-size-sm);
+    min-height: 24px;
+    margin-top: var(--space-sm);
+}
+
+.input-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+}
+
+/* 加载状态 */
+.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
