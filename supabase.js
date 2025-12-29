@@ -440,3 +440,27 @@ async function verifyFamilyPassword(password) {
     if (!currentFamily) return false;
     return currentFamily.password === password;
 }
+
+// ========== 暴露到全局作用域 ==========
+// 这些函数需要被 app.js 调用
+window.initSupabase = initSupabase;
+window.createFamily = createFamily;
+window.loginFamily = loginFamily;
+window.checkStoredLogin = checkStoredLogin;
+window.logoutFamily = logoutFamily;
+window.fetchTasks = fetchTasks;
+window.fetchDeletedTasks = fetchDeletedTasks;
+window.addTask = addTask;
+window.deleteTask = deleteTask;
+window.restoreTask = restoreTask;
+window.permanentlyDeleteTask = permanentlyDeleteTask;
+window.fetchTodayCheckins = fetchTodayCheckins;
+window.toggleCheckin = toggleCheckin;
+window.fetchRewards = fetchRewards;
+window.addReward = addReward;
+window.deleteReward = deleteReward;
+window.fetchStats = fetchStats;
+window.updateStats = updateStats;
+window.fetchHistory = fetchHistory;
+window.addHistoryRecord = addHistoryRecord;
+window.verifyFamilyPassword = verifyFamilyPassword;
