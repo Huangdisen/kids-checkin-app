@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 缓存 DOM 元素
 function cacheDOM() {
     DOM.totalPoints = document.getElementById('totalPoints');
+    DOM.pointsDisplay = document.querySelector('.points-display');
     DOM.digitalClock = document.getElementById('digitalClock');
     DOM.greeting = document.getElementById('greeting');
     DOM.currentDate = document.getElementById('currentDate');
@@ -591,20 +592,19 @@ function toggleTask(taskId) {
         // 触发星星飞翔动画
         // 找到任务卡片元素
         setTimeout(() => {
-            const taskCard = document.querySelector(`.task-card[onclick*="${taskId}"]`) ||
-                // 如果找不到特定onclick（因为是通过绑定事件），尝试通过其他方式定位
-                // 这里我们假设 renderTasks 生成时会有 data-id 属性
-                document.querySelector(`.task-card[data-id="${taskId}"]`);
+            const taskCard = document.querySelector(`.task-card[data-id="${taskId}"]`);
 
-            if (taskCard) {
+            if (taskCard && DOM.pointsDisplay) {
                 const startRect = taskCard.getBoundingClientRect();
-                const endRect = DOM.totalPoints.getBoundingClientRect();
+                const endRect = DOM.pointsDisplay.getBoundingClientRect();
 
-                // 从任务卡片中心飞到积分栏
+                // 从任务卡片中心飞到积分栏中心
                 const startX = startRect.left + startRect.width / 2;
                 const startY = startRect.top + startRect.height / 2;
+                const endX = endRect.left + endRect.width / 2;
+                const endY = endRect.top + endRect.height / 2;
 
-                flyStar(startX, startY, endRect.left + 20, endRect.top + 20);
+                flyStar(startX, startY, endX, endY);
 
                 // 积分栏高亮反馈
                 setTimeout(() => {
@@ -612,7 +612,7 @@ function toggleTask(taskId) {
                     setTimeout(() => DOM.pointsDisplay.classList.remove('highlight'), 500);
                 }, 800); // 飞翔时间
             }
-        }, 100);
+        }, 50);
     }
 
     // 保存数据
@@ -914,7 +914,7 @@ function renderTasks() {
     }
 
     DOM.tasksList.innerHTML = AppState.tasks.map(task => `
-        <div class="task-card ${task.completed ? 'completed' : ''}" onclick="toggleTask(${task.id})">
+        <div class="task-card ${task.completed ? 'completed' : ''}" data-id="${task.id}" onclick="toggleTask(${task.id})">
             <button class="task-delete" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
             <span class="task-emoji">${task.emoji}</span>
             <div class="task-content">
