@@ -90,6 +90,17 @@ async function syncTasksToCloud(tasks) {
             await supabaseClient
                 .from('tasks')
                 .upsert(cloudTasks, { onConflict: 'id' });
+
+            // 删除云端多余的任务，避免重复
+            const ids = cloudTasks.map(t => t.id);
+            await supabaseClient
+                .from('tasks')
+                .delete()
+                .eq('family_id', currentFamilyId)
+                .not('id', 'in', `(${ids.join(',')})`);
+        } else {
+            // 本地无任务则清空云端
+            await supabaseClient.from('tasks').delete().eq('family_id', currentFamilyId);
         }
         console.log('任务同步成功');
     } catch (error) {
@@ -143,6 +154,16 @@ async function syncRewardsToCloud(rewards) {
             await supabaseClient
                 .from('rewards')
                 .upsert(cloudRewards, { onConflict: 'id' });
+
+            // 删除云端多余的奖励，避免重复
+            const ids = cloudRewards.map(r => r.id);
+            await supabaseClient
+                .from('rewards')
+                .delete()
+                .eq('family_id', currentFamilyId)
+                .not('id', 'in', `(${ids.join(',')})`);
+        } else {
+            await supabaseClient.from('rewards').delete().eq('family_id', currentFamilyId);
         }
         console.log('奖励同步成功');
     } catch (error) {
