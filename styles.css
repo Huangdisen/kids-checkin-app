@@ -1813,3 +1813,79 @@ body {
     50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 169, 77, 0.6); }
     100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 169, 77, 0); }
 }
+
+/* ===================================
+   移动端布局优化 (iPhone 沉浸式)
+   =================================== */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 0;
+        height: 100dvh;
+    }
+    
+    .header {
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        margin-bottom: var(--space-sm);
+        padding: var(--space-md);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* 内容区域优化 - 去除两侧留白 */
+    .main-content {
+        padding: 0 var(--space-md) 100px var(--space-md); /* 底部留出导航栏空间 */
+    }
+    
+    .tasks-container {
+        grid-template-columns: 1fr; /* 强制单列 */
+        gap: var(--space-sm);
+    }
+
+    .shop-container {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 两列展示 */
+        gap: var(--space-sm);
+    }
+    
+    /* 底部导航栏 - 固定贴底 */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-top: var(--space-sm);
+        /* 适配 iPhone 底部安全区 */
+        padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+        z-index: 100;
+        justify-content: space-around;
+        gap: 0;
+    }
+    
+    .nav-btn {
+        padding: 4px;
+        flex: 1;
+    }
+    
+    .nav-icon {
+        font-size: 24px;
+    }
+    
+    .nav-label {
+        font-size: 10px;
+    }
+    
+    /* 弹窗优化 */
+    .modal-content {
+        width: 100%;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        position: fixed;
+        bottom: 0;
+        max-width: none;
+        animation: slideInUp 0.3s ease;
+        padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+    }
+}
