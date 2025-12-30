@@ -171,27 +171,32 @@ function cacheDOM() {
 function loadData() {
     const savedData = localStorage.getItem('kidsCheckinApp');
     if (savedData) {
-        const data = JSON.parse(savedData);
-        AppState.tasks = data.tasks || [];
-        AppState.rewards = data.rewards || [];
-        AppState.history = data.history || [];
-        AppState.recycleBin = data.recycleBin || [];
-        AppState.stats = data.stats || AppState.stats;
-        AppState.todayLocked = data.todayLocked || false;
-        AppState.todaySignature = data.todaySignature || null;
-        AppState.lockDate = data.lockDate || null;
+        try {
+            const data = JSON.parse(savedData);
+            AppState.tasks = data.tasks || [];
+            AppState.rewards = data.rewards || [];
+            AppState.history = data.history || [];
+            AppState.recycleBin = data.recycleBin || [];
+            AppState.stats = data.stats || AppState.stats;
+            AppState.todayLocked = data.todayLocked || false;
+            AppState.todaySignature = data.todaySignature || null;
+            AppState.lockDate = data.lockDate || null;
 
-        // 自动按任务 ID 排序，确保默认任务顺序正确
-        AppState.tasks.sort((a, b) => a.id - b.id);
+            // 自动按任务 ID 排序，确保默认任务顺序正确
+            AppState.tasks.sort((a, b) => a.id - b.id);
 
-        // 检查是否是新的一天，如果是则重置任务完成状态
-        checkNewDay();
-    } else {
-        // 首次使用，初始化默认数据
-        AppState.tasks = JSON.parse(JSON.stringify(defaultTasks));
-        AppState.rewards = JSON.parse(JSON.stringify(defaultRewards));
-        saveData();
+            // 检查是否是新的一天，如果是则重置任务完成状态
+            checkNewDay();
+            return;
+        } catch (e) {
+            console.warn('本地存储数据损坏，已重置', e);
+            localStorage.removeItem('kidsCheckinApp');
+        }
     }
+    // 首次使用或数据损坏，初始化默认数据
+    AppState.tasks = JSON.parse(JSON.stringify(defaultTasks));
+    AppState.rewards = JSON.parse(JSON.stringify(defaultRewards));
+    saveData();
 }
 
 // 保存数据到本地存储
