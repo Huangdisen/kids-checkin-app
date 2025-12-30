@@ -1711,3 +1711,101 @@ body {
         opacity: 0.6;
     }
 }
+/* ===================================
+   动画优化
+   =================================== */
+
+/* 1. 页面切换动画 */
+.page {
+    /* 覆盖原来的 display: none/block 在 app.js 中处理 */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    display: none;
+    transform: translateX(20px);
+}
+
+.page.active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* 2. 列表元素交错入场 */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-card, 
+.shop-container .reward-card,
+.history-item {
+    opacity: 0; /* 初始隐藏 */
+    animation: slideInUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 使用 :nth-child 设置延迟 */
+.task-card:nth-child(1) { animation-delay: 0.1s; }
+.task-card:nth-child(2) { animation-delay: 0.15s; }
+.task-card:nth-child(3) { animation-delay: 0.2s; }
+.task-card:nth-child(4) { animation-delay: 0.25s; }
+.task-card:nth-child(5) { animation-delay: 0.3s; }
+.task-card:nth-child(6) { animation-delay: 0.35s; }
+.task-card:nth-child(7) { animation-delay: 0.4s; }
+.task-card:nth-child(8) { animation-delay: 0.45s; }
+.task-card:nth-child(9) { animation-delay: 0.5s; }
+.task-card:nth-child(10) { animation-delay: 0.55s; }
+
+/* 3. 星星飞翔特效元素 */
+.flying-star {
+    position: fixed;
+    font-size: 24px;
+    pointer-events: none;
+    z-index: 2000;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.flying-star.fly {
+    transform: scale(0.5);
+    opacity: 0;
+}
+
+/* 4. 微交互动画 */
+/* 按钮点击反馈 */
+.btn:active, 
+.nav-btn:active, 
+.add-task-btn:active,
+.add-reward-btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* 选中状态的弹跳 */
+.task-check {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.task-card.completed .task-check {
+    animation: popCheck 0.4s forwards;
+}
+
+@keyframes popCheck {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 积分栏高亮效果 */
+.points-display.highlight {
+    animation: glowPulse 0.5s ease;
+}
+
+@keyframes glowPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 169, 77, 0); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 169, 77, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 169, 77, 0); }
+}

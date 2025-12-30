@@ -437,16 +437,40 @@ function bindEvents() {
 }
 
 // 页面切换
+// 页面切换
 function switchPage(pageId) {
+    // 找到当前活动页面
+    const currentActive = document.querySelector('.page.active');
+    const targetPage = document.getElementById(pageId);
+
+    if (currentActive === targetPage) return;
+
     // 更新导航按钮状态
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.page === pageId);
     });
 
-    // 更新页面显示
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.toggle('active', page.id === pageId);
-    });
+    // 平滑切换逻辑
+    if (currentActive) {
+        currentActive.style.opacity = '0';
+        currentActive.style.transform = 'translateX(-20px)';
+
+        setTimeout(() => {
+            currentActive.classList.remove('active');
+            // 重置样式以便下次进入
+            currentActive.style.opacity = '';
+            currentActive.style.transform = '';
+
+            targetPage.classList.add('active');
+            // 强制重绘以触发 transition
+            void targetPage.offsetWidth;
+            targetPage.style.opacity = '1';
+            targetPage.style.transform = 'translateX(0)';
+        }, 300); // 等待过渡完成
+    } else {
+        // 首次加载
+        targetPage.classList.add('active');
+    }
 
     // 如果切换到商城，更新积分显示
     if (pageId === 'shopPage') {
@@ -563,6 +587,32 @@ function toggleTask(taskId) {
 
         // 显示庆祝动画
         showCelebration(task.points);
+
+        // 触发星星飞翔动画
+        // 找到任务卡片元素
+        setTimeout(() => {
+            const taskCard = document.querySelector(`.task-card[onclick*="${taskId}"]`) ||
+                // 如果找不到特定onclick（因为是通过绑定事件），尝试通过其他方式定位
+                // 这里我们假设 renderTasks 生成时会有 data-id 属性
+                document.querySelector(`.task-card[data-id="${taskId}"]`);
+
+            if (taskCard) {
+                const startRect = taskCard.getBoundingClientRect();
+                const endRect = DOM.totalPoints.getBoundingClientRect();
+
+                // 从任务卡片中心飞到积分栏
+                const startX = startRect.left + startRect.width / 2;
+                const startY = startRect.top + startRect.height / 2;
+
+                flyStar(startX, startY, endRect.left + 20, endRect.top + 20);
+
+                // 积分栏高亮反馈
+                setTimeout(() => {
+                    DOM.pointsDisplay.classList.add('highlight');
+                    setTimeout(() => DOM.pointsDisplay.classList.remove('highlight'), 500);
+                }, 800); // 飞翔时间
+            }
+        }, 100);
     }
 
     // 保存数据
@@ -793,6 +843,29 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// 创建星星飞翔动画
+function flyStar(startX, startY, endX, endY) {
+    const star = document.createElement('div');
+    star.className = 'flying-star';
+    star.innerHTML = '⭐';
+    star.style.left = startX + 'px';
+    star.style.top = startY + 'px';
+
+    document.body.appendChild(star);
+
+    // 强制重绘
+    void star.offsetWidth;
+
+    // 设置结束位置和状态
+    star.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(0.5)`;
+    star.style.opacity = '0';
+
+    // 动画结束后移除
+    setTimeout(() => {
+        document.body.removeChild(star);
+    }, 800);
+}
 
 // 更新 UI
 function updateUI() {
