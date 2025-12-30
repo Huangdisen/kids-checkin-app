@@ -84,7 +84,8 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
     max-width: 1366px;
     margin: 0 auto;
     padding: var(--space-md);
@@ -636,6 +637,9 @@ body {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-top: var(--space-md);
+    
+    /* iPhone 安全区域适配 */
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
 }
 
 .nav-btn {
