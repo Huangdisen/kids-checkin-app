@@ -221,11 +221,26 @@ function saveData() {
         lockDate: AppState.lockDate
     };
     localStorage.setItem('kidsCheckinApp', JSON.stringify(data));
-
-    // 同步到云端（非阻塞）
+    // 同步到云端（非阻塞，带节流）
+    scheduleSyncToCloud();
     syncToCloud();
 }
 
+// 云同步节流/去抖
+let syncTimer = null;
+let syncInFlight = false;
+function scheduleSyncToCloud() {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+        if (syncInFlight) return; // 上一次还在进行，跳过本次
+        syncInFlight = true;
+        try {
+            await syncToCloud();
+        } finally {
+            syncInFlight = false;
+        }
+    }, 2000); // 2s 去抖，避免频繁全量写
+}
 // 同步到 Supabase 云端
 async function syncToCloud() {
     console.log('syncToCloud 被调用');

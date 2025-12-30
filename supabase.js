@@ -248,9 +248,9 @@ async function syncHistoryToCloud(history) {
             .delete()
             .eq('family_id', currentFamilyId);
 
-        // 插入新历史记录（最多保留50条）
+        // 插入新历史记录（与本地一致，最多保留100条）
         if (history.length > 0) {
-            const cloudHistory = history.slice(0, 50).map(record => ({
+            const cloudHistory = history.slice(0, 100).map(record => ({
                 family_id: currentFamilyId,
                 type: record.type,
                 text: record.text,
