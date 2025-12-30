@@ -84,8 +84,10 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Fallback */
-    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    height: 100vh;
+    /* Fallback */
+    height: 100dvh;
+    /* Dynamic viewport height for mobile browsers */
     max-width: 1366px;
     margin: 0 auto;
     padding: var(--space-md);
@@ -637,7 +639,7 @@ body {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-top: var(--space-md);
-    
+
     /* iPhone 安全区域适配 */
     padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
 }
@@ -1715,6 +1717,7 @@ body {
         opacity: 0.6;
     }
 }
+
 /* ===================================
    动画优化
    =================================== */
@@ -1740,30 +1743,69 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.task-card, 
+.task-card,
 .shop-container .reward-card,
 .history-item {
-    opacity: 0; /* 初始隐藏 */
+    /* 默认不隐藏，以免重绘时闪烁 */
+    opacity: 1;
+}
+
+/* 只有带有 .animate-in 类的元素才执行入场动画 */
+.animate-in .task-card,
+.animate-in .reward-card,
+.animate-in .history-item {
+    opacity: 0;
+    /* 初始隐藏 */
     animation: slideInUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* 使用 :nth-child 设置延迟 */
-.task-card:nth-child(1) { animation-delay: 0.1s; }
-.task-card:nth-child(2) { animation-delay: 0.15s; }
-.task-card:nth-child(3) { animation-delay: 0.2s; }
-.task-card:nth-child(4) { animation-delay: 0.25s; }
-.task-card:nth-child(5) { animation-delay: 0.3s; }
-.task-card:nth-child(6) { animation-delay: 0.35s; }
-.task-card:nth-child(7) { animation-delay: 0.4s; }
-.task-card:nth-child(8) { animation-delay: 0.45s; }
-.task-card:nth-child(9) { animation-delay: 0.5s; }
-.task-card:nth-child(10) { animation-delay: 0.55s; }
+.task-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.task-card:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.task-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.task-card:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.task-card:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+.task-card:nth-child(6) {
+    animation-delay: 0.35s;
+}
+
+.task-card:nth-child(7) {
+    animation-delay: 0.4s;
+}
+
+.task-card:nth-child(8) {
+    animation-delay: 0.45s;
+}
+
+.task-card:nth-child(9) {
+    animation-delay: 0.5s;
+}
+
+.task-card:nth-child(10) {
+    animation-delay: 0.55s;
+}
 
 /* 3. 星星飞翔特效元素 */
 .flying-star {
@@ -1781,8 +1823,8 @@ body {
 
 /* 4. 微交互动画 */
 /* 按钮点击反馈 */
-.btn:active, 
-.nav-btn:active, 
+.btn:active,
+.nav-btn:active,
 .add-task-btn:active,
 .add-reward-btn:active {
     transform: scale(0.95) !important;
@@ -1798,9 +1840,19 @@ body {
 }
 
 @keyframes popCheck {
-    0% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* 积分栏高亮效果 */
@@ -1809,9 +1861,20 @@ body {
 }
 
 @keyframes glowPulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 169, 77, 0); }
-    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 169, 77, 0.6); }
-    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 169, 77, 0); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(255, 169, 77, 0);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 169, 77, 0.6);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(255, 169, 77, 0);
+    }
 }
 
 /* ===================================
@@ -1822,29 +1885,32 @@ body {
         padding: 0;
         height: 100dvh;
     }
-    
+
     .header {
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
         margin-bottom: var(--space-sm);
         padding: var(--space-md);
         box-shadow: var(--shadow-sm);
     }
-    
+
     /* 内容区域优化 - 去除两侧留白 */
     .main-content {
-        padding: 0 var(--space-md) 100px var(--space-md); /* 底部留出导航栏空间 */
+        padding: 0 var(--space-md) 100px var(--space-md);
+        /* 底部留出导航栏空间 */
     }
-    
+
     .tasks-container {
-        grid-template-columns: 1fr; /* 强制单列 */
+        grid-template-columns: 1fr;
+        /* 强制单列 */
         gap: var(--space-sm);
     }
 
     .shop-container {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 两列展示 */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        /* 两列展示 */
         gap: var(--space-sm);
     }
-    
+
     /* 底部导航栏 - 固定贴底 */
     .bottom-nav {
         position: fixed;
@@ -1864,20 +1930,20 @@ body {
         justify-content: space-around;
         gap: 0;
     }
-    
+
     .nav-btn {
         padding: 4px;
         flex: 1;
     }
-    
+
     .nav-icon {
         font-size: 24px;
     }
-    
+
     .nav-label {
         font-size: 10px;
     }
-    
+
     /* 弹窗优化 */
     .modal-content {
         width: 100%;

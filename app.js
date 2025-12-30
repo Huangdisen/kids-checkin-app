@@ -57,8 +57,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadData();
     initializeApp();
     bindEvents();
-    // 初始渲染 UI
+    // 初始渲染 UI (带动画)
+    DOM.tasksList.classList.add('animate-in');
+    DOM.shopList.classList.add('animate-in');
+    DOM.historyList.classList.add('animate-in');
     updateUI();
+
+    // 移除动画类，防止后续更新时重复动画
+    setTimeout(() => {
+        DOM.tasksList.classList.remove('animate-in');
+        DOM.shopList.classList.remove('animate-in');
+        DOM.historyList.classList.remove('animate-in');
+    }, 1000);
 
     // 后台初始化 Supabase 并同步
     if (typeof initSupabaseAuto === 'function') {
@@ -272,6 +282,7 @@ async function tryLoadFromCloud() {
 
         if (hasCloudData) {
             // 仅当实际有云端数据更新时才再次刷新 UI
+            // 此时不包含 animate-in 类，所以不会重新播放入场动画
             updateUI();
 
             // 保存合并后的数据到本地
