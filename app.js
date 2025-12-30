@@ -23,6 +23,15 @@ const AppState = {
     lockDate: null
 };
 
+// 防止统计出现负数
+function clampStats() {
+    const s = AppState.stats;
+    s.totalPoints = Math.max(0, s.totalPoints || 0);
+    s.totalEarned = Math.max(0, s.totalEarned || 0);
+    s.totalRedeemed = Math.max(0, s.totalRedeemed || 0);
+    s.totalCheckins = Math.max(0, s.totalCheckins || 0);
+}
+
 // 默认任务 - 日常任务
 const defaultTasks = [
     { id: 1, emoji: '🌅', name: '早上准时起床', points: 1, completed: false },
@@ -653,6 +662,7 @@ function toggleTask(taskId) {
             }
         }, 50);
     }
+    clampStats();
 
     // 保存数据
     saveData();
@@ -780,6 +790,7 @@ function redeemReward(rewardId) {
             // 扣除积分
             AppState.stats.totalPoints -= reward.cost;
             AppState.stats.totalRedeemed++;
+            clampStats();
 
             // 添加历史记录
             addHistory('redeem', reward.emoji + ' ' + reward.name, -reward.cost);
