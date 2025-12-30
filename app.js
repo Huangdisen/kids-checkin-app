@@ -50,6 +50,17 @@ const defaultRewards = [
 
 // DOM 元素缓存
 const DOM = {};
+// 文本转义防止 XSS
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[m]));
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
@@ -687,7 +698,7 @@ function renderRecycleBin() {
         <div class="recycle-item">
             <div class="recycle-item-icon">${task.emoji}</div>
             <div class="recycle-item-info">
-                <div class="recycle-item-name">${task.name}</div>
+                <div class="recycle-item-name">${escapeHTML(task.name)}</div>
                 <div class="recycle-item-points">+${task.points} ⭐</div>
             </div>
             <div class="recycle-item-actions">
@@ -941,7 +952,7 @@ function renderTasks() {
             <button class="task-delete" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
             <span class="task-emoji">${task.emoji}</span>
             <div class="task-content">
-                <div class="task-name">${task.name}</div>
+                <div class="task-name">${escapeHTML(task.name)}</div>
                 <div class="task-points">+${task.points} ⭐</div>
             </div>
             <div class="task-check"></div>
@@ -965,7 +976,7 @@ function renderRewards() {
         <div class="reward-card">
             <button class="reward-delete" onclick="deleteReward(${reward.id})">✕</button>
             <span class="reward-emoji">${reward.emoji}</span>
-            <div class="reward-name">${reward.name}</div>
+            <div class="reward-name">${escapeHTML(reward.name)}</div>
             <div class="reward-cost">${reward.cost} ⭐</div>
             <button class="redeem-btn" 
                     onclick="redeemReward(${reward.id})"
@@ -997,7 +1008,7 @@ function renderHistory() {
             <div class="history-item">
                 <span class="history-icon">${record.type === 'checkin' ? '✅' : '🎁'}</span>
                 <div class="history-content">
-                    <div class="history-text">${record.text}</div>
+                    <div class="history-text">${escapeHTML(record.text)}</div>
                     <div class="history-time">${timeStr}</div>
                 </div>
                 <span class="history-points ${record.points >= 0 ? 'positive' : 'negative'}">
