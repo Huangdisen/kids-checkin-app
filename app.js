@@ -70,6 +70,16 @@ function escapeHTML(str) {
         "'": '&#39;'
     }[m]));
 }
+// 去重工具（优先按 id，缺失 id 时按内容签名）
+function dedupeById(list, key = 'id') {
+    const seen = new Set();
+    return list.filter(item => {
+        const sig = item[key] != null ? `${item[key]}` : `${item.name}|${item.emoji}|${item.points ?? item.cost ?? ''}`;
+        if (seen.has(sig)) return false;
+        seen.add(sig);
+        return true;
+    });
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
@@ -193,6 +203,8 @@ function loadData() {
 
             // 自动按任务 ID 排序，确保默认任务顺序正确
             AppState.tasks.sort((a, b) => a.id - b.id);
+            AppState.tasks = dedupeById(AppState.tasks);
+            AppState.rewards = dedupeById(AppState.rewards);
 
             // 检查是否是新的一天，如果是则重置任务完成状态
             checkNewDay();
@@ -289,12 +301,13 @@ async function tryLoadFromCloud() {
                 ...task,
                 completed: localCompletedIds.includes(task.id) ? true : task.completed
             }));
+            AppState.tasks = dedupeById(AppState.tasks);
             hasCloudData = true;
             console.log('从云端加载了任务');
         }
 
         if (cloudRewards && cloudRewards.length > 0) {
-            AppState.rewards = cloudRewards;
+            AppState.rewards = dedupeById(cloudRewards);
             hasCloudData = true;
             console.log('从云端加载了奖励');
         }
