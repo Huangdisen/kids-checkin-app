@@ -1889,3 +1889,10 @@ body {
         padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
     }
 }
+
+/* 加载状态优化 */
+body.loading .app-container {
+    opacity: 0.8;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}

@@ -57,14 +57,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadData();
     initializeApp();
     bindEvents();
+    // 初始渲染 UI
     updateUI();
 
     // 后台初始化 Supabase 并同步
     if (typeof initSupabaseAuto === 'function') {
-        const supabaseOk = await initSupabaseAuto();
-        if (supabaseOk) {
-            // 尝试从云端加载数据（如果本地没有）
-            await tryLoadFromCloud();
+        // 显示加载提示
+        document.body.classList.add('loading');
+
+        try {
+            const supabaseOk = await initSupabaseAuto();
+            if (supabaseOk) {
+                // 尝试从云端加载数据
+                await tryLoadFromCloud();
+            }
+        } catch (e) {
+            console.error('Supabase init failed:', e);
+        } finally {
+            document.body.classList.remove('loading');
         }
     }
 });
@@ -261,7 +271,9 @@ async function tryLoadFromCloud() {
         }
 
         if (hasCloudData) {
+            // 仅当实际有云端数据更新时才再次刷新 UI
             updateUI();
+
             // 保存合并后的数据到本地
             localStorage.setItem('kidsCheckinApp', JSON.stringify({
                 tasks: AppState.tasks,
