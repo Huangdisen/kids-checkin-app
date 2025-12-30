@@ -76,15 +76,9 @@ async function syncTasksToCloud(tasks) {
     if (!supabaseReady) return;
 
     try {
-        // 删除旧任务
-        await supabaseClient
-            .from('tasks')
-            .delete()
-            .eq('family_id', currentFamilyId);
-
-        // 插入新任务
         if (tasks.length > 0) {
             const cloudTasks = tasks.map((task, index) => ({
+                id: task.id, // 保留原 ID，便于多端一致
                 family_id: currentFamilyId,
                 emoji: task.emoji,
                 name: task.name,
@@ -95,7 +89,7 @@ async function syncTasksToCloud(tasks) {
 
             await supabaseClient
                 .from('tasks')
-                .insert(cloudTasks);
+                .upsert(cloudTasks, { onConflict: 'id' });
         }
         console.log('任务同步成功');
     } catch (error) {
@@ -136,13 +130,10 @@ async function syncRewardsToCloud(rewards) {
     if (!supabaseReady) return;
 
     try {
-        await supabaseClient
-            .from('rewards')
-            .delete()
-            .eq('family_id', currentFamilyId);
 
         if (rewards.length > 0) {
             const cloudRewards = rewards.map(reward => ({
+                id: reward.id,
                 family_id: currentFamilyId,
                 emoji: reward.emoji,
                 name: reward.name,
@@ -151,7 +142,7 @@ async function syncRewardsToCloud(rewards) {
 
             await supabaseClient
                 .from('rewards')
-                .insert(cloudRewards);
+                .upsert(cloudRewards, { onConflict: 'id' });
         }
         console.log('奖励同步成功');
     } catch (error) {
@@ -242,15 +233,11 @@ async function syncHistoryToCloud(history) {
     if (!supabaseReady) return;
 
     try {
-        // 删除旧历史记录
-        await supabaseClient
-            .from('history')
-            .delete()
-            .eq('family_id', currentFamilyId);
 
         // 插入新历史记录（与本地一致，最多保留100条）
         if (history.length > 0) {
             const cloudHistory = history.slice(0, 100).map(record => ({
+                id: record.id,
                 family_id: currentFamilyId,
                 type: record.type,
                 text: record.text,
@@ -260,7 +247,7 @@ async function syncHistoryToCloud(history) {
 
             await supabaseClient
                 .from('history')
-                .insert(cloudHistory);
+                .upsert(cloudHistory, { onConflict: 'id' });
         }
         console.log('历史记录同步成功');
     } catch (error) {

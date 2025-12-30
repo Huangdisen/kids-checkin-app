@@ -83,10 +83,33 @@ ALTER TABLE rewards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE history ENABLE ROW LEVEL SECURITY;
 
--- RLS 策略 - 允许匿名访问（简化版，用于家庭码登录）
-CREATE POLICY "Allow all for families" ON families FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for tasks" ON tasks FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for daily_checkins" ON daily_checkins FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for rewards" ON rewards FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for family_stats" ON family_stats FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for history" ON history FOR ALL USING (true) WITH CHECK (true);
+-- RLS 策略 - 仅允许固定家庭 (starfamily) 访问对应数据
+DROP POLICY IF EXISTS "Allow all for families" ON families;
+DROP POLICY IF EXISTS "Allow all for tasks" ON tasks;
+DROP POLICY IF EXISTS "Allow all for daily_checkins" ON daily_checkins;
+DROP POLICY IF EXISTS "Allow all for rewards" ON rewards;
+DROP POLICY IF EXISTS "Allow all for family_stats" ON family_stats;
+DROP POLICY IF EXISTS "Allow all for history" ON history;
+
+CREATE POLICY "families fixed family" ON families
+    USING (family_code = 'starfamily') WITH CHECK (family_code = 'starfamily');
+
+CREATE POLICY "tasks fixed family" ON tasks
+    USING (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'))
+    WITH CHECK (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'));
+
+CREATE POLICY "daily_checkins fixed family" ON daily_checkins
+    USING (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'))
+    WITH CHECK (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'));
+
+CREATE POLICY "rewards fixed family" ON rewards
+    USING (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'))
+    WITH CHECK (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'));
+
+CREATE POLICY "family_stats fixed family" ON family_stats
+    USING (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'))
+    WITH CHECK (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'));
+
+CREATE POLICY "history fixed family" ON history
+    USING (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'))
+    WITH CHECK (family_id IN (SELECT id FROM families WHERE family_code = 'starfamily'));
