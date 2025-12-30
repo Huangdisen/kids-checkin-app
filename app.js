@@ -1249,8 +1249,8 @@ function handlePointerMove(e) {
 function clearSignature() {
     const canvas = DOM.signatureCanvas;
     if (!canvas || !signatureCtx) return;
-
-    const rect = canvas.getBoundingClientRect();
+    // 使用实际像素尺寸清空，避免高分屏残影
+    signatureCtx.clearRect(0, 0, canvas.width, canvas.height);
     signatureCtx.clearRect(0, 0, rect.width, rect.height);
     hasSignature = false;
     canvas.classList.remove('signing');
